@@ -7,9 +7,14 @@ vim.cmd("set cursorline")
 vim.cmd("set cursorcolumn")
 vim.cmd("set termguicolors")
 vim.cmd("set rtp+=/home/linuxbrew/.linuxbrew/opt/fzf")
+-- vim.cmd('highlight Cursor guifg=NONE guibg=NONE')
+-- vim.cmd("set guicursor=n-v-c:block-Cursor")
+-- vim.cmd("set guicursor+=i:ver100-iCursor")
+vim.cmd("highlight Cursor guifg=NONE guibg=NONE")
+-- vim.cmd("highlight iCursor guifg=NONE guibg=NONE")
 vim.wo.number = true
 vim.g.mapleader = " "
-vim.g.maplocalleader = "\\"
+vim.g.maplocalleader = " "
 vim.o.pumblend = 0
 vim.o.winblend = 0
 vim.o.background = "dark"
