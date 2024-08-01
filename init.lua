@@ -143,13 +143,13 @@ local plugins = {
     {
       "folke/tokyonight.nvim",
       lazy = false,
-      priority = 1000,
+      -- priority = 1000,
       -- opts = {},
     },
 	    {
 		"catppuccin/nvim",
 		name = "catppuccin",
-		priority = 10000,
+		-- priority = 10000,
 	--config = function()
 	--	--setting up the colorscheme
 	--	require("catppuccin").setup()
@@ -159,7 +159,7 @@ local plugins = {
 	},
   {
     "tiagovla/tokyodark.nvim",
-    priority = 10000,
+    -- priority = 10000,
     opts = {
         -- custom options here
     },
@@ -1314,3 +1314,4 @@ function toggle_hlsearch()
    end
 end
 vim.keymap.set("n", "<leader>hl", ":lua toggle_hlsearch()<CR>", {})
+vim.loader.enable()
