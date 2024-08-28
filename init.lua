@@ -1423,7 +1423,8 @@ local plugins = {
 				sections = {
 					lualine_a = { { "mode", icon = "", separator = { right = "" }, right_padding = 2 } }, --
 					lualine_b = {
-						{ "branch", color = { bg = "#303030" }, separator = { left = "" } },
+					-- section_separators = { left = "", right = "" },--
+						{ "branch", color = { bg = "#303030" }, separator = { left = "",right = "", } },
 						{
 							"diff",
 							symbols = {
@@ -2212,6 +2213,7 @@ local plugins = {
 					"TelescopeBorder",
 					"TelescopePromptBorder",
 					"SagaBorder",
+					"CursorLine",
 					"SagaNormal",
 				},
 				exclude_groups = {
@@ -2219,7 +2221,7 @@ local plugins = {
 					"String",
 					"Constant",
 					"Special",
-					"CursorLine",
+					-- "CursorLine",
 					"ColorColumn",
 					"colorizer.highlight_buffer",
 					"Colorize",
