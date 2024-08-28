@@ -1104,7 +1104,15 @@ local plugins = {
 	{
 		"ziontee113/color-picker.nvim",
 		config = function()
-			require("color-picker").setup()
+			require("color-picker").setup({-- for changing icons & mappings
+     ["icons"] = { "ﱢ", "" },
+	-- ["icons"] = { "ﮊ", "" },
+	-- ["icons"] = { "", "ﰕ" },
+	-- ["icons"] = { "", "" },
+	-- ["icons"] = { "", "" },
+	-- ["icons"] = { "ﱢ", "" },
+	-- ["border"] = "rounded", -- none | single | double | rounded | solid | shadow)
+})
 		end,
 	},
 	{
