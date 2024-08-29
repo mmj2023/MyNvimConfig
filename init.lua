@@ -1432,7 +1432,7 @@ local plugins = {
 					lualine_a = { { "mode", icon = "", separator = { right = "" }, right_padding = 2 } }, --
 					lualine_b = {
 					-- section_separators = { left = "", right = "" },--
-						{ "branch", color = { bg = "#303030" }, separator = { left = "",right = "", } },
+						{ "branch",icon = "", color = { bg = "#303030" }, separator = { left = "",right = "", } },
 						{
 							"diff",
 							symbols = {
@@ -2258,6 +2258,23 @@ local plugins = {
 	-- },
 	-- TODO: fix this
 	{
+  'stevearc/dressing.nvim',
+  opts = {input = {
+    win_options = {
+      winhighlight = 'NormalFloat:DiagnosticError'
+    }
+  }
+},
+{
+    '2kabhishek/nerdy.nvim',
+    dependencies = {
+        'stevearc/dressing.nvim',
+        'nvim-telescope/telescope.nvim',
+    },
+    cmd = 'Nerdy',
+},
+},
+	{
 		"NvChad/nvim-colorizer.lua",
 		opts = {},
 		config = function()
@@ -2437,13 +2454,13 @@ local plugins = {
 
 				return datetime
 					.. nvim_version_info
-					.. "\n⚡ Neovim loaded "
-					.. stats.loaded
-					.. "/"
-					.. stats.count
-					.. " plugins in "
-					.. ms
-					.. "ms"
+					-- .. "\n⚡ Neovim loaded "
+					-- .. stats.loaded
+					-- .. "/"
+					-- .. stats.count
+					-- .. " plugins in "
+					-- .. ms
+					-- .. "ms"
 			end
 			dashboard.section.header.val = {
 				[[                                                                      =====================================================================]],
