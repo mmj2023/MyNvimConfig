@@ -179,20 +179,32 @@ vim.g.toggle_theme_icon = "   "
 --installing lazy and getting it started up
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.oop).fs_stat(lazypath) then
-	vim.fn.system({
-		"git",
-		"clone",
-		"--filter=blob:none",
-		"https://github.com/folke/lazy.nvim.git",
-		"--branch=stable", -- latest stable release
-		lazypath,
-	})
+	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+	local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+	if vim.v.shell_error ~= 0 then
+		vim.api.nvim_echo({
+			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+			{ out, "WarningMsg" },
+			{ "\nPress any key to exit..." },
+		}, true, {})
+		vim.fn.getchar()
+		os.exit(1)
+	end
 end
+-- 	vim.fn.system({
+-- 		"git",
+-- 		"clone",
+-- 		"--filter=blob:none",
+-- 		"https://github.com/folke/lazy.nvim.git",
+-- 		"--branch=stable", -- latest stable release
+-- 		lazypath,
+-- 	})
+-- end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-	"tpope/vim-sleuth",
-	{ "numToStr/Comment.nvim", opts = {} },
+	{ "tpope/vim-sleuth", lazy = false },
+	{ "numToStr/Comment.nvim", lazy = false, opts = {} },
 	{ -- Adds git related signs to the gutter, as well as utilities for managing changes
 		"lewis6991/gitsigns.nvim",
 		event = "VeryLazy",
@@ -289,6 +301,44 @@ local plugins = {
 		"catppuccin/nvim",
 		name = "catppuccin",
 		-- priority = 10000,
+		opts = {
+			integrations = {
+				aerial = true,
+				alpha = true,
+				cmp = true,
+				dashboard = true,
+				flash = true,
+				grug_far = true,
+				gitsigns = true,
+				headlines = true,
+				illuminate = true,
+				indent_blankline = { enabled = true },
+				leap = true,
+				lsp_trouble = true,
+				mason = true,
+				markdown = true,
+				mini = true,
+				native_lsp = {
+					enabled = true,
+					underlines = {
+						errors = { "undercurl" },
+						hints = { "undercurl" },
+						warnings = { "undercurl" },
+						information = { "undercurl" },
+					},
+				},
+				navic = { enabled = true, custom_bg = "lualine" },
+				neotest = true,
+				neotree = true,
+				noice = true,
+				notify = true,
+				semantic_tokens = true,
+				telescope = true,
+				treesitter = true,
+				treesitter_context = true,
+				which_key = true,
+			},
+		},
 		config = function()
 			--	--setting up the colorscheme
 			require("catppuccin").setup({
@@ -545,42 +595,96 @@ local plugins = {
 		"ThePrimeagen/harpoon",
 		branch = "harpoon2",
 		dependencies = { "nvim-lua/plenary.nvim" },
-		config = function()
-			local harpoon = require("harpoon")
-			-- REQUIRED
-			harpoon:setup()
-			-- REQUIRED
+		opts = {
+			menu = {
+				width = vim.api.nvim_win_get_width(0) - 4,
+			},
+			settings = {
+				save_on_toggle = true,
+			},
+		},
+		keys = function()
+			local keys = {
+				{
+					"<leader>H",
+					function()
+						require("harpoon"):list():add()
+					end,
+					desc = "Harpoon File",
+				},
+				{
+					"<leader>h",
+					function()
+						local harpoon = require("harpoon")
+						harpoon.ui:toggle_quick_menu(harpoon:list())
+					end,
+					desc = "Harpoon Quick Menu",
+				},
+			}
 
-			-- local mark = require("harpoon.mark")
-			-- local ui = require("harpoon.ui")
-			vim.keymap.set("n", "<leader>+", function()
-				harpoon:list():add()
-			end)
-			vim.keymap.set("n", "<C-e>", function()
-				harpoon.ui:toggle_quick_menu(harpoon:list())
-			end)
-
-			vim.keymap.set("n", "<C-Up>", function()
-				harpoon:list():select(1)
-			end, { noremap = true, silent = true })
-			vim.keymap.set("n", "<C-Down>", function()
-				harpoon:list():select(2)
-			end, { noremap = true, silent = true })
-			vim.keymap.set("n", "<C-Left>", function()
-				harpoon:list():select(3)
-			end, { noremap = true, silent = true })
-			vim.keymap.set("n", "<C-Right>", function()
-				harpoon:list():select(4)
-			end, { noremap = true, silent = true })
+			for i = 1, 5 do
+				table.insert(keys, {
+					"<leader>" .. i,
+					function()
+						require("harpoon"):list():select(i)
+					end,
+					desc = "Harpoon to File " .. i,
+				})
+			end
+			return keys
 		end,
+		-- config = function()
+		-- 	local harpoon = require("harpoon")
+		-- 	-- REQUIRED
+		-- 	harpoon:setup()
+		-- 	-- REQUIRED
+		--
+		-- 	-- local mark = require("harpoon.mark")
+		-- 	-- local ui = require("harpoon.ui")
+		-- 	vim.keymap.set("n", "<leader>+", function()
+		-- 		harpoon:list():add()
+		-- 	end)
+		-- 	vim.keymap.set("n", "<C-e>", function()
+		-- 		harpoon.ui:toggle_quick_menu(harpoon:list())
+		-- 	end)
+		--
+		-- 	vim.keymap.set("n", "<C-Up>", function()
+		-- 		harpoon:list():select(1)
+		-- 	end, { noremap = true, silent = true })
+		-- 	vim.keymap.set("n", "<C-Down>", function()
+		-- 		harpoon:list():select(2)
+		-- 	end, { noremap = true, silent = true })
+		-- 	vim.keymap.set("n", "<C-Left>", function()
+		-- 		harpoon:list():select(3)
+		-- 	end, { noremap = true, silent = true })
+		-- 	vim.keymap.set("n", "<C-Right>", function()
+		-- 		harpoon:list():select(4)
+		-- 	end, { noremap = true, silent = true })
+		-- end,
 	},
 	{
-		{ "folke/playground" },
+		{
+			"folke/playground",
+			event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		},
+		-- event = { "BufReadPost", "BufNewFile", "BufWritePre" }, },
+		{
+			"nvim-treesitter/nvim-treesitter-textobjects",
+			event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		},
+		{
+			"nvim-treesitter/nvim-treesitter-refactor",
+			event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		},
+		{
+			"nvim-treesitter/nvim-treesitter-context",
+			event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		},
+		{
+			"windwp/nvim-ts-autotag",
+			event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		},
 		"nvim-treesitter/nvim-treesitter",
-		"nvim-treesitter/nvim-treesitter-textobjects",
-		"nvim-treesitter/nvim-treesitter-refactor",
-		"nvim-treesitter/nvim-treesitter-context",
-		"windwp/nvim-ts-autotag",
 		event = { "BufNewFile", "BufReadPre" },
 		build = ":TSUpdate",
 		dependencies = {
@@ -817,7 +921,7 @@ local plugins = {
 			})
 			require("treesitter-context").setup({
 				enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-				max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+				max_lines = 5, -- How many lines the window should span. Values <= 0 mean no limit.
 				min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
 				line_numbers = true,
 				multiline_threshold = 5, -- Maximum number of lines to show for a single context
@@ -837,6 +941,16 @@ local plugins = {
 			-- local ts_update = require("nvim-treesitter.install").update({ with_sync = true })
 			-- ts_update()
 		end,
+	},
+	{
+		"stevearc/aerial.nvim",
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		opts = {},
+		-- Optional dependencies
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-tree/nvim-web-devicons",
+		},
 	},
 	{
 		"nvim-tree/nvim-web-devicons",
@@ -982,6 +1096,7 @@ local plugins = {
 	},
 	{
 		"tiagovla/scope.nvim",
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
 		opts = {},
 		config = function()
 			require("scope").setup({})
@@ -990,6 +1105,7 @@ local plugins = {
 
 	{
 		"stevearc/oil.nvim",
+		event = { "VimEnter", "BufReadPost", "BufNewFile", "BufWritePre" },
 		opts = {},
 		-- Optional dependencies
 		dependencies = { { "echasnovski/mini.icons", opts = {} } },
@@ -1051,6 +1167,7 @@ local plugins = {
 	},
 	{
 		"refractalize/oil-git-status.nvim",
+		event = { "VimEnter", "BufReadPost", "BufNewFile", "BufWritePre" },
 
 		dependencies = {
 			"stevearc/oil.nvim",
@@ -1103,6 +1220,7 @@ local plugins = {
 	-- },
 	{
 		"ziontee113/color-picker.nvim",
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
 		config = function()
 			require("color-picker").setup({ -- for changing icons & mappings
 				["icons"] = { "ﱢ", "" },
@@ -1117,10 +1235,11 @@ local plugins = {
 	},
 	{
 		"dstein64/vim-startuptime",
-		-- opts = {},
-		-- config = function()
-		--   require('startuptime').setup()
-		-- end,
+		event = "VimEnter",
+		cmd = "StartupTime",
+		config = function()
+			vim.g.startuptime_tries = 10
+		end,
 	},
 	{
 		"nvim-lualine/lualine.nvim",
@@ -1237,7 +1356,7 @@ local plugins = {
 			-- end
 
 			local function get_root_dir()
-				local clients = vim.lsp.get_active_clients()
+				local clients = vim.lsp.get_clients()
 				if next(clients) == nil then
 					return vim.fn.getcwd()
 				end
@@ -1263,7 +1382,7 @@ local plugins = {
 
 				-- If using LSP, get the root directory
 
-				local clients = vim.lsp.get_active_clients()
+				local clients = vim.lsp.get_clients()
 				if next(clients) ~= nil then
 					for _, client in pairs(clients) do
 						if client.config.root_dir then
@@ -1495,38 +1614,38 @@ local plugins = {
 					},
 
 					lualine_x = {
-            -- stylua: ignore
-            -- {
-            --   function() return require("noice").api.status.command.get() end,
-            --   cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
-            --   color = function() return LazyVim.ui.fg("Statement") end,
-            --
-            -- },
-            -- stylua: ignore
-            -- {
-            --   function() return require("noice").api.status.mode.get() end,
-            --   cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
-            --   color = function() return LazyVim.ui.fg("Constant") end,
-            -- },
-            -- stylua: ignore
-            {
-              function() return "  " .. require("dap").status() end,
-              cond = function()
-                return package.loaded["dap"] and
-                    require("dap").status() ~= ""
-              end,
+						-- stylua: ignore
+						-- {
+						--   function() return require("noice").api.status.command.get() end,
+						--   cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
+						--   color = function() return LazyVim.ui.fg("Statement") end,
+						--
+						-- },
+						-- stylua: ignore
+						-- {
+						--   function() return require("noice").api.status.mode.get() end,
+						--   cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
+						--   color = function() return LazyVim.ui.fg("Constant") end,
+						-- },
+						-- stylua: ignore
+						{
+							function() return "  " .. require("dap").status() end,
+							cond = function()
+								return package.loaded["dap"] and
+								    require("dap").status() ~= ""
+							end,
 
-              -- color = function() return get_fg_color("Debug") end,
-            },
-            -- stylua: ignore
-            {
-              require("lazy.status").updates,
-              cond = require("lazy.status").has_updates,
-              color = { fg = "#ff7d50" },
-              -- separator = { left = '' },
-              -- component_separators = { left = '', right = ''},
-              --     section_separators = { left = '', right = ''},
-            },
+							-- color = function() return get_fg_color("Debug") end,
+						},
+						-- stylua: ignore
+						{
+							require("lazy.status").updates,
+							cond = require("lazy.status").has_updates,
+							color = { fg = "#ff7d50" },
+							-- separator = { left = '' },
+							-- component_separators = { left = '', right = ''},
+							--     section_separators = { left = '', right = ''},
+						},
 						--     {
 						--       "diff",
 						--       symbols = {
@@ -2264,13 +2383,17 @@ local plugins = {
 	-- TODO: fix this
 	{
 		"stevearc/dressing.nvim",
-		opts = { input = {
-			win_options = {
-				winhighlight = "NormalFloat:DiagnosticError",
+		event = "VeryLazy",
+		opts = {
+			input = {
+				win_options = {
+					winhighlight = "NormalFloat:DiagnosticError",
+				},
 			},
-		} },
+		},
 		{
 			"2kabhishek/nerdy.nvim",
+			event = { "BufReadPost", "BufNewFile", "BufWritePre" },
 			dependencies = {
 				"stevearc/dressing.nvim",
 				"nvim-telescope/telescope.nvim",
@@ -2280,53 +2403,67 @@ local plugins = {
 	},
 	{
 		"NvChad/nvim-colorizer.lua",
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
 		opts = {},
 		config = function()
 			require("colorizer").setup({})
 		end,
 	},
+	-- {
+	-- 	"yetone/avante.nvim",
+	-- 	event = "VeryLazy",
+	-- 	build = "make",
+	-- 	opts = {
+	-- 		-- add any opts here
+	-- 	},
+	-- 	dependencies = {
+	-- 		"nvim-tree/nvim-web-devicons",
+	-- 		"stevearc/dressing.nvim",
+	-- 		"nvim-lua/plenary.nvim",
+	-- 		{
+	-- 			"grapp-dev/nui-components.nvim",
+	-- 			dependencies = {
+	-- 				"MunifTanjim/nui.nvim",
+	-- 			},
+	-- 		},
+	-- 		--- The below is optional, make sure to setup it properly if you have lazy=true
+	-- 		{
+	-- 			"MeanderingProgrammer/render-markdown.nvim",
+	-- 	event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+	-- 			dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" },
+	-- 			opts = {
+	-- 				file_types = { "markdown", "Avante" },
+	-- 			},
+	-- 			ft = { "markdown", "Avante", "latex" },
+	-- 			latex = {
+	-- 				enabled = true, -- Set to false if you want to disable LaTeX support
+	-- 				config = function(_, opts)
+	-- 					require("render-markdown").setup(opts)
+	-- 				end,
+	-- 			},
+	-- 		},
+	-- },
 	{
-		"yetone/avante.nvim",
-		event = "VeryLazy",
-		build = "make",
-		opts = {
-			-- add any opts here
-		},
-		dependencies = {
-			"nvim-tree/nvim-web-devicons",
-			"stevearc/dressing.nvim",
-			"nvim-lua/plenary.nvim",
-			{
-				"grapp-dev/nui-components.nvim",
-				dependencies = {
-					"MunifTanjim/nui.nvim",
-				},
-			},
-			--- The below is optional, make sure to setup it properly if you have lazy=true
-			{
-				"MeanderingProgrammer/render-markdown.nvim",
-				dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" },
-				opts = {
-					file_types = { "markdown", "Avante" },
-				},
-				ft = { "markdown", "Avante", "latex" },
-				latex = {
-					enabled = true, -- Set to false if you want to disable LaTeX support
-					config = function(_, opts)
-						require("render-markdown").setup(opts)
-					end,
-				},
-			},
+		"folke/persistence.nvim",
+		event = "BufReadPre",
+		opts = {},
+		-- stylua: ignore
+		keys = {
+			{ "<leader>qs", function() require("persistence").load() end,                desc = "Restore Session" },
+			{ "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
+			{ "<leader>qd", function() require("persistence").stop() end,                desc = "Don't Save Current Session" },
 		},
 	},
 	{
 		"supermaven-inc/supermaven-nvim",
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
 		config = function()
 			require("supermaven-nvim").setup({})
 		end,
 	},
 	{
 		"j-hui/fidget.nvim",
+		event = { "BufReadPre", "BufReadPost", "BufNewFile", "BufWritePre" },
 		opts = {
 			-- options
 		},
@@ -2342,18 +2479,45 @@ local plugins = {
 	},
 	{
 		"RRethy/vim-illuminate",
-		config = function()
-			require("illuminate").configure({
-				providers = {
-					"lsp",
-					"treesitter",
-					"regex",
-				},
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		opts = {
+			delay = 200,
+			providers = {
+				"lsp",
+				"treesitter",
+				"regex",
+			},
+			large_file_cutoff = 2000,
+			large_file_overrides = {
+				providers = { "lsp" },
+			},
+		},
+		config = function(_, opts)
+			require("illuminate").configure(opts)
+			local function map(key, dir, buffer)
+				vim.keymap.set("n", key, function()
+					require("illuminate")["goto_" .. dir .. "_reference"](false)
+				end, { desc = dir:sub(1, 1):upper() .. dir:sub(2) .. " Reference", buffer = buffer })
+			end
+			map("]]", "next")
+			map("[[", "prev")
+			-- also set it after loading ftplugins, since a lot overwrite [[ and ]]
+			vim.api.nvim_create_autocmd("FileType", {
+				callback = function()
+					local buffer = vim.api.nvim_get_current_buf()
+					map("]]", "next", buffer)
+					map("[[", "prev", buffer)
+				end,
 			})
 		end,
+		keys = {
+			{ "]]", desc = "Next Reference" },
+			{ "[[", desc = "Prev Reference" },
+		},
 	},
 	{
 		"nvimtools/none-ls.nvim",
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
 		config = function()
 			--setting up none-ls
 			local null_ls = require("null-ls")
@@ -2413,6 +2577,7 @@ local plugins = {
 	--
 	{
 		"rcarriga/nvim-notify",
+		event = "VeryLazy",
 		opts = {},
 		config = function()
 			local function get_background_color()
@@ -2601,8 +2766,84 @@ local plugins = {
 			end,
 		},
 	},
+	{
+		"yetone/avante.nvim",
+		-- event = "VeryLazy",-- TODO: have to figure it out
+		lazy = true,
+		opts = {
+			-- add any opts here
+		},
+		keys = {
+			{
+				"<leader>aa",
+				function()
+					require("avante.api").ask()
+				end,
+				desc = "avante: ask",
+				mode = { "n", "v" },
+			},
+			{
+				"<leader>ar",
+				function()
+					require("avante.api").refresh()
+				end,
+				desc = "avante: refresh",
+			},
+			{
+				"<leader>ae",
+				function()
+					require("avante.api").edit()
+				end,
+				desc = "avante: edit",
+				mode = "v",
+			},
+		},
+		dependencies = {
+			"stevearc/dressing.nvim",
+			"nvim-lua/plenary.nvim",
+			"MunifTanjim/nui.nvim",
+			--- The below dependencies are optional,
+			"nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+			{
+				-- support for image pasting
+				"HakonHarnes/img-clip.nvim",
+				event = "VeryLazy",
+				opts = {
+					-- recommended settings
+					default = {
+						embed_image_as_base64 = false,
+						prompt_for_file_name = false,
+						drag_and_drop = {
+							insert_mode = true,
+						},
+						-- required for Windows users
+						use_absolute_path = true,
+					},
+				},
+			},
+			{
+				-- Make sure to setup it properly if you have lazy=true
+				"MeanderingProgrammer/render-markdown.nvim",
+				event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+
+				opts = {
+					file_types = { "markdown", "Avante" },
+				},
+				ft = { "markdown", "Avante" },
+			},
+		},
+	},
 }
 local opts = {
+	defaults = {
+		-- By default, only LazyVim plugins will be lazy-loaded. Your custom plugins will load during startup.
+		-- If you know what you're doing, you can set this to `true` to have all your custom plugins lazy-loaded by default.
+		lazy = true,
+		-- It's recommended to leave version=false for now, since a lot the plugin that support versioning,
+		-- have outdated releases, which may break your Neovim install.
+		version = false, -- always use the latest git commit
+		-- version = "*", -- try installing the latest stable version for plugins that support semver
+	},
 	checker = { enabled = true, notify = false },
 	ui = {
 		icons = {
