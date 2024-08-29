@@ -1104,15 +1104,15 @@ local plugins = {
 	{
 		"ziontee113/color-picker.nvim",
 		config = function()
-			require("color-picker").setup({-- for changing icons & mappings
-     ["icons"] = { "ﱢ", "" },
-	-- ["icons"] = { "ﮊ", "" },
-	-- ["icons"] = { "", "ﰕ" },
-	-- ["icons"] = { "", "" },
-	-- ["icons"] = { "", "" },
-	-- ["icons"] = { "ﱢ", "" },
-	-- ["border"] = "rounded", -- none | single | double | rounded | solid | shadow)
-})
+			require("color-picker").setup({ -- for changing icons & mappings
+				["icons"] = { "ﱢ", "" },
+				-- ["icons"] = { "ﮊ", "" },
+				-- ["icons"] = { "", "ﰕ" },
+				-- ["icons"] = { "", "" },
+				-- ["icons"] = { "", "" },
+				-- ["icons"] = { "ﱢ", "" },
+				-- ["border"] = "rounded", -- none | single | double | rounded | solid | shadow)
+			})
 		end,
 	},
 	{
@@ -1431,8 +1431,13 @@ local plugins = {
 				sections = {
 					lualine_a = { { "mode", icon = "", separator = { right = "" }, right_padding = 2 } }, --
 					lualine_b = {
-					-- section_separators = { left = "", right = "" },--
-						{ "branch",icon = "", color = { bg = "#303030" }, separator = { left = "",right = "", } },
+						-- section_separators = { left = "", right = "" },--
+						{
+							"branch",
+							icon = "",
+							color = { bg = "#303030" },
+							separator = { left = "", right = "" },
+						},
 						{
 							"diff",
 							symbols = {
@@ -2258,22 +2263,21 @@ local plugins = {
 	-- },
 	-- TODO: fix this
 	{
-  'stevearc/dressing.nvim',
-  opts = {input = {
-    win_options = {
-      winhighlight = 'NormalFloat:DiagnosticError'
-    }
-  }
-},
-{
-    '2kabhishek/nerdy.nvim',
-    dependencies = {
-        'stevearc/dressing.nvim',
-        'nvim-telescope/telescope.nvim',
-    },
-    cmd = 'Nerdy',
-},
-},
+		"stevearc/dressing.nvim",
+		opts = { input = {
+			win_options = {
+				winhighlight = "NormalFloat:DiagnosticError",
+			},
+		} },
+		{
+			"2kabhishek/nerdy.nvim",
+			dependencies = {
+				"stevearc/dressing.nvim",
+				"nvim-telescope/telescope.nvim",
+			},
+			cmd = "Nerdy",
+		},
+	},
 	{
 		"NvChad/nvim-colorizer.lua",
 		opts = {},
@@ -2452,15 +2456,14 @@ local plugins = {
 				local stats = require("lazy").stats()
 				local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
 
-				return datetime
-					.. nvim_version_info
-					-- .. "\n⚡ Neovim loaded "
-					-- .. stats.loaded
-					-- .. "/"
-					-- .. stats.count
-					-- .. " plugins in "
-					-- .. ms
-					-- .. "ms"
+				return datetime .. nvim_version_info
+				-- .. "\n⚡ Neovim loaded "
+				-- .. stats.loaded
+				-- .. "/"
+				-- .. stats.count
+				-- .. " plugins in "
+				-- .. ms
+				-- .. "ms"
 			end
 			dashboard.section.header.val = {
 				[[                                                                      =====================================================================]],
