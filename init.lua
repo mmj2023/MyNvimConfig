@@ -924,7 +924,7 @@ local plugins = {
 				max_lines = 5, -- How many lines the window should span. Values <= 0 mean no limit.
 				min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
 				line_numbers = true,
-				multiline_threshold = 5, -- Maximum number of lines to show for a single context
+				multiline_threshold = 3, -- Maximum number of lines to show for a single context
 				trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
 				mode = "cursor", -- Line used to calculate context. Choices: 'cursor', 'topline'
 				-- Separator between context and content. Should be a single character string, like '-'.
@@ -1614,38 +1614,38 @@ local plugins = {
 					},
 
 					lualine_x = {
-						-- stylua: ignore
-						-- {
-						--   function() return require("noice").api.status.command.get() end,
-						--   cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
-						--   color = function() return LazyVim.ui.fg("Statement") end,
-						--
-						-- },
-						-- stylua: ignore
-						-- {
-						--   function() return require("noice").api.status.mode.get() end,
-						--   cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
-						--   color = function() return LazyVim.ui.fg("Constant") end,
-						-- },
-						-- stylua: ignore
-						{
-							function() return "  " .. require("dap").status() end,
-							cond = function()
-								return package.loaded["dap"] and
-								    require("dap").status() ~= ""
-							end,
+            -- stylua: ignore
+            -- {
+            --   function() return require("noice").api.status.command.get() end,
+            --   cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
+            --   color = function() return LazyVim.ui.fg("Statement") end,
+            --
+            -- },
+            -- stylua: ignore
+            -- {
+            --   function() return require("noice").api.status.mode.get() end,
+            --   cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
+            --   color = function() return LazyVim.ui.fg("Constant") end,
+            -- },
+            -- stylua: ignore
+            {
+              function() return "  " .. require("dap").status() end,
+              cond = function()
+                return package.loaded["dap"] and
+                    require("dap").status() ~= ""
+              end,
 
-							-- color = function() return get_fg_color("Debug") end,
-						},
-						-- stylua: ignore
-						{
-							require("lazy.status").updates,
-							cond = require("lazy.status").has_updates,
-							color = { fg = "#ff7d50" },
-							-- separator = { left = '' },
-							-- component_separators = { left = '', right = ''},
-							--     section_separators = { left = '', right = ''},
-						},
+              -- color = function() return get_fg_color("Debug") end,
+            },
+            -- stylua: ignore
+            {
+              require("lazy.status").updates,
+              cond = require("lazy.status").has_updates,
+              color = { fg = "#ff7d50" },
+              -- separator = { left = '' },
+              -- component_separators = { left = '', right = ''},
+              --     section_separators = { left = '', right = ''},
+            },
 						--     {
 						--       "diff",
 						--       symbols = {
@@ -2193,13 +2193,13 @@ local plugins = {
 								spacing = 4,
 								prefix = function(diagnostic)
 									if diagnostic.severity == vim.diagnostic.severity.ERROR then
-										return "" -- Error icon
+										return "" -- Error icon
 									elseif diagnostic.severity == vim.diagnostic.severity.WARN then
-										return "" -- Warning icon
+										return "" -- Warning icon
 									elseif diagnostic.severity == vim.diagnostic.severity.INFO then
-										return "" -- Info icon
+										return "" -- Info icon
 									elseif diagnostic.severity == vim.diagnostic.severity.HINT then
-										return "" --💡 Hint icon
+										return "" --💡 Hint icon
 									end
 								end, --●
 							},
@@ -2212,6 +2212,12 @@ local plugins = {
 					virtual_text = true,
 					signs = {
 						priority = 8,
+						values = {
+							{ name = "DiagnosticSignError", text = "" },
+							{ name = "DiagnosticSignWarn", text = "" },
+							{ name = "DiagnosticSignInfo", text = "" },
+							{ name = "DiagnosticSignHint", text = "💡" },
+						},
 					},
 					underline = true,
 					update_in_insert = true,
@@ -2447,12 +2453,12 @@ local plugins = {
 		"folke/persistence.nvim",
 		event = "BufReadPre",
 		opts = {},
-		-- stylua: ignore
-		keys = {
-			{ "<leader>qs", function() require("persistence").load() end,                desc = "Restore Session" },
-			{ "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
-			{ "<leader>qd", function() require("persistence").stop() end,                desc = "Don't Save Current Session" },
-		},
+    -- stylua: ignore
+    keys = {
+      { "<leader>qs", function() require("persistence").load() end,                desc = "Restore Session" },
+      { "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
+      { "<leader>qd", function() require("persistence").stop() end,                desc = "Don't Save Current Session" },
+    },
 	},
 	{
 		"supermaven-inc/supermaven-nvim",
