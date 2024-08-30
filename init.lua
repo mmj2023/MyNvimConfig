@@ -1766,9 +1766,6 @@ local plugins = {
 			lazy = false,
 			opts = {
 				auto_install = true,
-			},
-			config = function()
-				require("mason-lspconfig").setup({ --"standardrb","java_language_server","ruby_lsp","nil_ls"
 					ensure_installed = {
 						-- "solargraph",
 						"typos_lsp",
@@ -1847,7 +1844,9 @@ local plugins = {
 						"diagnosticls",
 						"nil_ls",
 					},
-				})
+			},
+			config = function(_, opts)
+				require("mason-lspconfig").setup(opts)--"standardrb","java_language_server","ruby_lsp","nil_ls")
 			end,
 		},
 		{
