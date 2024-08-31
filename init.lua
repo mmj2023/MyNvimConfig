@@ -215,7 +215,7 @@ if not (vim.uv or vim.oop).fs_stat(lazypath) then
 	if vim.v.shell_error ~= 0 then
 		vim.api.nvim_echo({
 			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-			{ out, "WarningMsg" },
+			{ out,                            "WarningMsg" },
 			{ "\nPress any key to exit..." },
 		}, true, {})
 		vim.fn.getchar()
@@ -234,7 +234,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-	{ "tpope/vim-sleuth", lazy = false },
+	{ "tpope/vim-sleuth",      lazy = false },
 	{ "numToStr/Comment.nvim", lazy = false, opts = {} },
 	{ -- Adds git related signs to the gutter, as well as utilities for managing changes
 		"lewis6991/gitsigns.nvim",
@@ -258,7 +258,8 @@ local plugins = {
 		},
 		config = function(_, opts)
 			vim.keymap.set("n", "<leader>gp", "Gitsigns prev_hunk", { noremap = true, silent = true })
-			vim.keymap.set("n", "<leader>gtb", "Gitsigns toggle_current_line_blame", { noremap = true, silent = true })
+			vim.keymap.set("n", "<leader>gtb", "Gitsigns toggle_current_line_blame",
+				{ noremap = true, silent = true })
 			require("gitsigns").setup(opts)
 		end,
 		--[[
@@ -292,9 +293,9 @@ local plugins = {
 	},
 	{
 		"tpope/vim-fugitive",
-			event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
 		-- opts = {},
-			-- cmd = "Git",
+		-- cmd = "Git",
 		keys = {
 			{ "<leader>gs", vim.cmd.Git, desc = "Neogit Status" },
 			-- 		{ "<leader>gd", function() require("neogit").open("diffview") end, desc = "Neogit Diff" },
@@ -606,7 +607,8 @@ local plugins = {
 			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 			vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>fr", builtin.resume, { desc = "[S]earch [R]esume" })
-			vim.keymap.set("n", "<leader>f.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+			vim.keymap.set("n", "<leader>f.", builtin.oldfiles,
+				{ desc = '[S]earch Recent Files ("." for repeat)' })
 			vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "[ ] Find existing buffers" })
 
 			-- Slightly advanced example of overriding default behavior and theme
@@ -1106,7 +1108,7 @@ local plugins = {
 						Info = " ",
 					}
 					local ret = (diag.error and icons.Error .. diag.error .. " " or "")
-						.. (diag.warning and icons.Warn .. diag.warning or "")
+					    .. (diag.warning and icons.Warn .. diag.warning or "")
 					return vim.trim(ret)
 				end,
 				-- diagnostics_update_in_insert = true,
@@ -1734,7 +1736,7 @@ local plugins = {
 						--     },
 					},
 					lualine_y = {
-						{ "encoding", color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
+						{ "encoding",   color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
 						{ "fileformat", color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
 						{
 							"filetype",
@@ -2023,7 +2025,8 @@ local plugins = {
 					end,
 					capabilities = capabilities,
 					handlers = {
-						["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+						["textDocument/publishDiagnostics"] = vim.lsp.with(
+						vim.lsp.diagnostic.on_publish_diagnostics, {
 							virtual_text = true,
 							signs = true,
 							underline = true,
@@ -2723,7 +2726,8 @@ local plugins = {
 				-- local total_plugins = #vim.tbl_keys(packer_plugins)
 				local datetime = os.date(" %d-%m-%Y   %H:%M:%S")
 				local version = vim.version()
-				local nvim_version_info = "   v" .. version.major .. "." .. version.minor .. "." .. version.patch
+				local nvim_version_info = "   v" ..
+				version.major .. "." .. version.minor .. "." .. version.patch
 				local stats = require("lazy").stats()
 				local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
 
