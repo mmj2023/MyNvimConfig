@@ -1,4 +1,34 @@
 vim.opt.expandtab = true
+--  Synchronize clipboard with Windows system clipboard if running on WSL2
+local function is_wsl()
+	local file = io.popen("ls /mnt/wslg/runtime-dir 2>/dev/null")
+	---@cast file -nil
+	local output = file:read("*all")
+	file:close()
+	if output ~= "" then
+		return true
+	end
+	return false
+end
+
+if is_wsl() then
+	-- print("Running on WSL")
+	vim.g.clipboard = {
+		name = "WslClipboard",
+		copy = {
+			["+"] = "clip.exe",
+			["*"] = "clip.exe",
+		},
+		paste = {
+			["+"] = 'pwsh.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+			["*"] = 'pwsh.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+		},
+		cache_enabled = 0,
+	}
+	-- else
+	-- 	print("Not running on WSL")
+end
+
 vim.loader.enable()
 vim.cmd("set tabstop=2")
 vim.cmd("set softtabstop=2")
@@ -83,6 +113,7 @@ vim.opt.smartcase = true
 vim.opt.signcolumn = "yes"
 -- keymaps
 vim.keymap.set("x", "<leader>p", '"_dp')
+vim.keymap.set("x", "<leader>tt", "<cmd>set laststatus=3<CR>", {})
 -- vim.keymap.set("n", "<leader>y", "\"+y" )
 vim.keymap.set("v", "<leader>y", '"+y')
 vim.keymap.set("n", "<leader>d", '"_d')
@@ -1066,7 +1097,7 @@ local plugins = {
 				show_close_icon = true,
 				show_tab_indicators = true,
 				persist_buffer_sort = true,
-				separator_style = "padded_slant", -- Change this to "slant", "thick", "thin", "padded_slant", or a custom table
+				separator_style = "slant", -- Change this to "slant", "thick", "thin", "padded_slant", or a custom table
 				enforce_regular_tabs = false,
 				always_show_bufferline = true,
 
@@ -1240,6 +1271,19 @@ local plugins = {
 		config = function()
 			vim.g.startuptime_tries = 10
 		end,
+	},
+	{
+		"utilyre/barbecue.nvim",
+		event = "VeryLazy",
+		name = "barbecue",
+		version = "*",
+		dependencies = {
+			"SmiteshP/nvim-navic",
+			"nvim-tree/nvim-web-devicons", -- optional dependency
+		},
+		opts = {
+			-- configurations go here
+		},
 	},
 	{
 		"nvim-lualine/lualine.nvim",
@@ -1614,38 +1658,38 @@ local plugins = {
 					},
 
 					lualine_x = {
-            -- stylua: ignore
-            -- {
-            --   function() return require("noice").api.status.command.get() end,
-            --   cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
-            --   color = function() return LazyVim.ui.fg("Statement") end,
-            --
-            -- },
-            -- stylua: ignore
-            -- {
-            --   function() return require("noice").api.status.mode.get() end,
-            --   cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
-            --   color = function() return LazyVim.ui.fg("Constant") end,
-            -- },
-            -- stylua: ignore
-            {
-              function() return "  " .. require("dap").status() end,
-              cond = function()
-                return package.loaded["dap"] and
-                    require("dap").status() ~= ""
-              end,
+						-- stylua: ignore
+						-- {
+						--   function() return require("noice").api.status.command.get() end,
+						--   cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
+						--   color = function() return LazyVim.ui.fg("Statement") end,
+						--
+						-- },
+						-- stylua: ignore
+						-- {
+						--   function() return require("noice").api.status.mode.get() end,
+						--   cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
+						--   color = function() return LazyVim.ui.fg("Constant") end,
+						-- },
+						-- stylua: ignore
+						{
+							function() return "  " .. require("dap").status() end,
+							cond = function()
+								return package.loaded["dap"] and
+								    require("dap").status() ~= ""
+							end,
 
-              -- color = function() return get_fg_color("Debug") end,
-            },
-            -- stylua: ignore
-            {
-              require("lazy.status").updates,
-              cond = require("lazy.status").has_updates,
-              color = { fg = "#ff7d50" },
-              -- separator = { left = '' },
-              -- component_separators = { left = '', right = ''},
-              --     section_separators = { left = '', right = ''},
-            },
+							-- color = function() return get_fg_color("Debug") end,
+						},
+						-- stylua: ignore
+						{
+							require("lazy.status").updates,
+							cond = require("lazy.status").has_updates,
+							color = { fg = "#ff7d50" },
+							-- separator = { left = '' },
+							-- component_separators = { left = '', right = ''},
+							--     section_separators = { left = '', right = ''},
+						},
 						--     {
 						--       "diff",
 						--       symbols = {
@@ -1766,87 +1810,87 @@ local plugins = {
 			lazy = false,
 			opts = {
 				auto_install = true,
-					ensure_installed = {
-						-- "solargraph",
-						"typos_lsp",
-						"lua_ls",
-						"rust_analyzer",
-						"arduino_language_server",
-						-- "angularls",
-						-- "asm_lsp",
-						"astro",
-						"bashls",
-						"clangd",
-						-- "csharp_ls",
-						"neocmake",
-						"cssls",
-						"cssmodules_ls",
-						"css_variables",
-						"unocss",
-						"omnisharp",
-						"dockerls",
-						"docker_compose_language_service",
-						"elixirls",
-						"lexical",
-						"golangci_lint_ls",
-						"gopls",
-						"graphql",
-						"html",
-						"htmx",
-						-- "hls",
-						"jsonls",
-						"biome",
-						"jdtls",
-						"quick_lint_js",
-						"tsserver",
-						-- "vtsls",
-						"julials",
-						"kotlin_language_server",
-						"ltex",
-						"texlab",
-						"autotools_ls",
-						"markdown_oxide",
-						-- "matlab_ls",
-						-- "ocamllsp",
-						-- "nimls",
-						-- "nim_langserver",
-						"rnix",
-						"perlnavigator",
-						-- "psalm",
-						-- "phpactor",
-						-- "intelephense",
-						-- "powershell_es",
-						"marksman",
-						"prosemd_lsp",
-						"remark_ls",
-						"vale_ls",
-						-- "zk",
-						"basedpyright",
-						"jedi_language_server",
-						"pyre",
-						"pyright",
-						"pylyzer",
-						"sourcery",
-						"pylsp",
-						-- "ruff",
-						-- "ruff_lsp",
-						-- "r_language_server",
-						"sqlls",
-						"sqls",
-						-- "rubocop",
-						"sorbet",
-						"taplo",
-						"tailwindcss",
-						"lemminx",
-						"hydra_lsp",
-						-- "yamlls",
-						"zls",
-						"diagnosticls",
-						"nil_ls",
-					},
+				ensure_installed = {
+					-- "solargraph",
+					"typos_lsp",
+					"lua_ls",
+					"rust_analyzer",
+					"arduino_language_server",
+					-- "angularls",
+					-- "asm_lsp",
+					"astro",
+					"bashls",
+					"clangd",
+					-- "csharp_ls",
+					"neocmake",
+					"cssls",
+					"cssmodules_ls",
+					"css_variables",
+					"unocss",
+					"omnisharp",
+					"dockerls",
+					"docker_compose_language_service",
+					"elixirls",
+					"lexical",
+					"golangci_lint_ls",
+					"gopls",
+					"graphql",
+					"html",
+					"htmx",
+					-- "hls",
+					"jsonls",
+					"biome",
+					"jdtls",
+					"quick_lint_js",
+					"tsserver",
+					-- "vtsls",
+					"julials",
+					"kotlin_language_server",
+					"ltex",
+					"texlab",
+					"autotools_ls",
+					"markdown_oxide",
+					-- "matlab_ls",
+					-- "ocamllsp",
+					-- "nimls",
+					-- "nim_langserver",
+					"rnix",
+					"perlnavigator",
+					-- "psalm",
+					-- "phpactor",
+					-- "intelephense",
+					-- "powershell_es",
+					"marksman",
+					"prosemd_lsp",
+					"remark_ls",
+					"vale_ls",
+					-- "zk",
+					"basedpyright",
+					"jedi_language_server",
+					"pyre",
+					"pyright",
+					"pylyzer",
+					"sourcery",
+					"pylsp",
+					-- "ruff",
+					-- "ruff_lsp",
+					-- "r_language_server",
+					"sqlls",
+					"sqls",
+					-- "rubocop",
+					"sorbet",
+					"taplo",
+					"tailwindcss",
+					"lemminx",
+					"hydra_lsp",
+					-- "yamlls",
+					"zls",
+					"diagnosticls",
+					"nil_ls",
+				},
 			},
 			config = function(_, opts)
-				require("mason-lspconfig").setup(opts)--"standardrb","java_language_server","ruby_lsp","nil_ls")
+				require("mason-lspconfig").setup(opts) --"standardrb","java_language_server","ruby_lsp","nil_ls")
 			end,
 		},
 		{
@@ -1953,7 +1997,23 @@ local plugins = {
 					capabilities = capabilities,
 				})
 				lspconfig.clangd.setup({
+					cmd = { "clangd", "--background-index", "--suggest-missing-includes" },
+					filetypes = { "c", "cpp", "objc", "objcpp" },
+					root_dir = function()
+						return vim.loop.cwd()
+					end,
 					capabilities = capabilities,
+					handlers = {
+						["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+							virtual_text = true,
+							signs = true,
+							underline = true,
+							update_in_insert = false,
+						}),
+					},
+					init_options = {
+						compilationDatabaseDirectory = "build",
+					},
 				})
 				lspconfig.csharp_ls.setup({
 					capabilities = capabilities,
@@ -2352,6 +2412,7 @@ local plugins = {
 					"SagaBorder",
 					"CursorLine",
 					"SagaNormal",
+					"WinBar",
 				},
 				exclude_groups = {
 					"Comment",
@@ -2364,7 +2425,7 @@ local plugins = {
 					"Colorize",
 				}, -- table: groups you don't want to clear
 			})
-			-- require("transparent").clear_prefix("NeoTree")
+			require("transparent").clear_prefix("barbecue")
 			require("transparent").clear_prefix("Lualine")
 			require("transparent").clear_prefix("BufferLine")
 			-- require('transparent').clear_prefix("mason")
@@ -2452,12 +2513,12 @@ local plugins = {
 		"folke/persistence.nvim",
 		event = "BufReadPre",
 		opts = {},
-    -- stylua: ignore
-    keys = {
-      { "<leader>qs", function() require("persistence").load() end,                desc = "Restore Session" },
-      { "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
-      { "<leader>qd", function() require("persistence").stop() end,                desc = "Don't Save Current Session" },
-    },
+		-- stylua: ignore
+		keys = {
+			{ "<leader>qs", function() require("persistence").load() end,                desc = "Restore Session" },
+			{ "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
+			{ "<leader>qd", function() require("persistence").stop() end,                desc = "Don't Save Current Session" },
+		},
 	},
 	{
 		"supermaven-inc/supermaven-nvim",
