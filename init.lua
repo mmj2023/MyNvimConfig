@@ -292,12 +292,34 @@ local plugins = {
 	},
 	{
 		"tpope/vim-fugitive",
-		event = "VeryLazy",
-		opts = {},
-		config = function()
-			vim.keymap.set("n", "<leader>gs", vim.cmd.Git)
-		end,
+			event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		-- opts = {},
+			-- cmd = "Git",
+		keys = {
+			{ "<leader>gs", vim.cmd.Git, desc = "Neogit Status" },
+			-- 		{ "<leader>gd", function() require("neogit").open("diffview") end, desc = "Neogit Diff" },
+		},
+		-- config = function()
+		-- 	vim.keymap.set("n", "<leader>gs", vim.cmd.Git)
+		-- end,
 	},
+	-- {
+	-- 	"NeogitOrg/neogit",
+	-- 	-- event = "VeryLazy",
+	-- 	dependencies = {
+	-- 		"nvim-lua/plenary.nvim", -- required
+	-- 		"sindrets/diffview.nvim", -- optional - Diff integration
+	--
+	-- 		-- Only one of these is needed, not both.
+	-- 		"nvim-telescope/telescope.nvim", -- optional
+	-- 		"ibhagwan/fzf-lua", -- optional
+	-- 	},
+	-- 	keys = {
+	-- 		{ "<leader>gs", function() require("neogit").open() end,           desc = "Neogit Status" },
+	-- 		{ "<leader>gd", function() require("neogit").open("diffview") end, desc = "Neogit Diff" },
+	-- 	},
+	-- 	config = true
+	-- },
 	-- Highlight todo, notes, etc in comments
 	{
 		"folke/todo-comments.nvim",
@@ -368,15 +390,12 @@ local plugins = {
 				treesitter = true,
 				treesitter_context = true,
 				which_key = true,
+				transparent = vim.g.transparent_enabled,
 			},
 		},
-		config = function()
+		config = function(_, opts)
 			--	--setting up the colorscheme
-			require("catppuccin").setup({
-				--	vim.o.background = "dark"
-				--	vim.cmd.colorscheme("catppuccin")
-				transparent = vim.g.transparent_enabled,
-			})
+			require("catppuccin").setup(opts)
 		end,
 	},
 	{
@@ -955,7 +974,7 @@ local plugins = {
 				max_lines = 5, -- How many lines the window should span. Values <= 0 mean no limit.
 				min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
 				line_numbers = true,
-				multiline_threshold = 3, -- Maximum number of lines to show for a single context
+				multiline_threshold = 2, -- Maximum number of lines to show for a single context
 				trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
 				mode = "cursor", -- Line used to calculate context. Choices: 'cursor', 'topline'
 				-- Separator between context and content. Should be a single character string, like '-'.
@@ -2427,6 +2446,7 @@ local plugins = {
 			})
 			require("transparent").clear_prefix("barbecue")
 			require("transparent").clear_prefix("Lualine")
+			require("transparent").clear_prefix("fidget")
 			require("transparent").clear_prefix("BufferLine")
 			-- require('transparent').clear_prefix("mason")
 			--vim.keymap.set("n", "<Space>te", ":TransparentEnable<CR>", {})
@@ -2530,12 +2550,32 @@ local plugins = {
 	{
 		"j-hui/fidget.nvim",
 		event = { "BufReadPre", "BufReadPost", "BufNewFile", "BufWritePre" },
-		opts = {
-			-- options
-		},
+		-- opts = {
+		-- 	progress = {
+		-- 		poll_rate = 100, -- how often to poll for progress messages
+		-- 		suppress_on_insert = true, -- suppress messages while in insert mode
+		-- 	},
+		-- 	-- options related to how LSP progress messages are displayed
+		-- 	display = {
+		-- 		spinner = "dots", -- animation style
+		-- 		done_icon = "✔", -- icon for completed tasks
+		-- 	},
+		-- 	-- options
+		-- },
 		config = function()
 			--setting up fidget
-			require("fidget").setup({})
+			require("fidget").setup({
+				-- -- options related to LSP progress subsystem
+				-- progress = {
+				-- 	poll_rate = 100, -- how often to poll for progress messages
+				-- 	suppress_on_insert = true, -- suppress messages while in insert mode
+				-- },
+				-- -- options related to how LSP progress messages are displayed
+				-- display = {
+				-- 	spinner = "dots", -- animation style
+				-- 	done_icon = "✔", -- icon for completed tasks
+				-- },
+			})
 		end,
 	},
 	{
@@ -2781,6 +2821,7 @@ local plugins = {
 				"saadparwaiz1/cmp_luasnip",
 				"rafamadriz/friendly-snippets",
 				"petertriho/cmp-git",
+				"hrsh7th/cmp-emoji",
 			},
 		},
 		{
@@ -2821,6 +2862,7 @@ local plugins = {
 					sources = cmp.config.sources({
 						{ name = "nvim_lsp" },
 						{ name = "luasnip" }, -- For luasnip users.
+						{ name = "emoji" },
 						--{ name = 'vsnip' }, -- For vsnip users.
 						-- { name = 'ultisnips' }, -- For ultisnips users.
 						-- { name = 'snippy' }, -- For snippy users.
