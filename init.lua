@@ -2200,12 +2200,12 @@ local plugins = {
 					capabilities = capabilities,
 					handlers = {
 						["textDocument/publishDiagnostics"] = vim.lsp.with(
-						vim.lsp.diagnostic.on_publish_diagnostics, {
-							virtual_text = true,
-							signs = true,
-							underline = true,
-							update_in_insert = false,
-						}),
+							vim.lsp.diagnostic.on_publish_diagnostics, {
+								virtual_text = true,
+								signs = true,
+								underline = true,
+								update_in_insert = false,
+							}),
 					},
 					init_options = {
 						compilationDatabaseDirectory = "build",
@@ -2654,7 +2654,7 @@ local plugins = {
 				vim.cmd("TransparentDisable")
 				local bg_color = vim.fn.synIDattr(vim.fn.hlID("Normal"), "bg")
 				vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=' ..
-				bg_color .. "; fi")
+					bg_color .. "; fi")
 			end, { noremap = true, silent = true })
 		end,
 	},
@@ -2929,7 +2929,7 @@ local plugins = {
 				local datetime = os.date(" %d-%m-%Y   %H:%M:%S")
 				local version = vim.version()
 				local nvim_version_info = "   v" ..
-				version.major .. "." .. version.minor .. "." .. version.patch
+				    version.major .. "." .. version.minor .. "." .. version.patch
 				local stats = require("lazy").stats()
 				local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
 
@@ -3146,6 +3146,26 @@ local plugins = {
 				ft = { "markdown", "Avante" },
 			},
 		},
+	},
+	{
+		"nvchad/volt",
+		-- event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		event = {"VimEnter"},
+		-- opts = {},
+	},
+	{
+		"nvchad/menu",
+		-- event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		event = {"VimEnter"},
+		-- opts = {},
+		keys = {
+			{ "<leader>me", function() require("menu").open("default") end, desc = "Menu" },
+		},
+	},
+	{
+		"nvchad/minty",
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		-- opts = {},
 	},
 }
 local opts = {
