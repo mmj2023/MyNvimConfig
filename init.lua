@@ -242,7 +242,7 @@ if not (vim.uv or vim.oop).fs_stat(lazypath) then
 	if vim.v.shell_error ~= 0 then
 		vim.api.nvim_echo({
 			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-			{ out, "WarningMsg" },
+			{ out,                            "WarningMsg" },
 			{ "\nPress any key to exit..." },
 		}, true, {})
 		vim.fn.getchar()
@@ -261,7 +261,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-	{ "tpope/vim-sleuth", lazy = false },
+	{ "tpope/vim-sleuth",      lazy = false },
 	{
 		"glacambre/firenvim",
 		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
@@ -290,7 +290,8 @@ local plugins = {
 		},
 		config = function(_, opts)
 			vim.keymap.set("n", "<leader>gp", "Gitsigns prev_hunk", { noremap = true, silent = true })
-			vim.keymap.set("n", "<leader>gtb", "Gitsigns toggle_current_line_blame", { noremap = true, silent = true })
+			vim.keymap.set("n", "<leader>gtb", "Gitsigns toggle_current_line_blame",
+				{ noremap = true, silent = true })
 			require("gitsigns").setup(opts)
 		end,
 		--[[
@@ -686,12 +687,12 @@ local plugins = {
 				--   },
 				-- },
 				pickers = {
-                                  colorscheme = {
-					  enable_preview = true,
-				    }, -- preview the colorscheme in the picker
-				  find_files = {
-					  hidden = true, -- enable this to see hidden files
-				    }, -- find files in the current directory
+					colorscheme = {
+						enable_preview = true,
+					}, -- preview the colorscheme in the picker
+					find_files = {
+						hidden = true, -- enable this to see hidden files
+					}, -- find files in the current directory
 				},
 				defaults = {
 					prompt_prefix = "   ",
@@ -728,7 +729,8 @@ local plugins = {
 			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 			vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>fr", builtin.resume, { desc = "[S]earch [R]esume" })
-			vim.keymap.set("n", "<leader>f.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+			vim.keymap.set("n", "<leader>f.", builtin.oldfiles,
+				{ desc = '[S]earch Recent Files ("." for repeat)' })
 			vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "[ ] Find existing buffers" })
 			vim.keymap.set("n", "<leader>col", builtin.colorscheme, { desc = "[ ] Find existing buffers" })
 
@@ -772,11 +774,46 @@ local plugins = {
 		-- 	require("flash").setup({})
 		-- end,
 		keys = {
-			{ "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-			{ "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-			{ "r", mode = {"o"}, function() require("flash").remote() end, desc = "Flash Remote" },
-			{ "R", mode = { "o","x" }, function() require("flash").treesitter_search() end, desc = "Flash Treesitter Search" },
-			{ "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Flash Toggle Search" },
+			{
+				"s",
+				mode = { "n", "x", "o" },
+				function()
+					require("flash").jump()
+				end,
+				desc = "Flash",
+			},
+			{
+				"S",
+				mode = { "n", "x", "o" },
+				function()
+					require("flash").treesitter()
+				end,
+				desc = "Flash Treesitter",
+			},
+			{
+				"r",
+				mode = { "o" },
+				function()
+					require("flash").remote()
+				end,
+				desc = "Flash Remote",
+			},
+			{
+				"R",
+				mode = { "o", "x" },
+				function()
+					require("flash").treesitter_search()
+				end,
+				desc = "Flash Treesitter Search",
+			},
+			{
+				"<c-s>",
+				mode = { "c" },
+				function()
+					require("flash").toggle()
+				end,
+				desc = "Flash Toggle Search",
+			},
 		},
 	},
 	{
@@ -1260,7 +1297,7 @@ local plugins = {
 						Info = " ",
 					}
 					local ret = (diag.error and icons.Error .. diag.error .. " " or "")
-						.. (diag.warning and icons.Warn .. diag.warning or "")
+					    .. (diag.warning and icons.Warn .. diag.warning or "")
 					return vim.trim(ret)
 				end,
 				-- diagnostics_update_in_insert = true,
@@ -1872,7 +1909,7 @@ local plugins = {
 						--     },
 					},
 					lualine_y = {
-						{ "encoding", color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
+						{ "encoding",   color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
 						{ "fileformat", color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
 						{
 							"filetype",
@@ -2162,7 +2199,8 @@ local plugins = {
 					end,
 					capabilities = capabilities,
 					handlers = {
-						["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+						["textDocument/publishDiagnostics"] = vim.lsp.with(
+						vim.lsp.diagnostic.on_publish_diagnostics, {
 							virtual_text = true,
 							signs = true,
 							underline = true,
@@ -2615,7 +2653,8 @@ local plugins = {
 			vim.keymap.set("n", "<Space>td", function()
 				vim.cmd("TransparentDisable")
 				local bg_color = vim.fn.synIDattr(vim.fn.hlID("Normal"), "bg")
-				vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=' .. bg_color .. "; fi")
+				vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=' ..
+				bg_color .. "; fi")
 			end, { noremap = true, silent = true })
 		end,
 	},
@@ -2889,7 +2928,8 @@ local plugins = {
 				-- local total_plugins = #vim.tbl_keys(packer_plugins)
 				local datetime = os.date(" %d-%m-%Y   %H:%M:%S")
 				local version = vim.version()
-				local nvim_version_info = "   v" .. version.major .. "." .. version.minor .. "." .. version.patch
+				local nvim_version_info = "   v" ..
+				version.major .. "." .. version.minor .. "." .. version.patch
 				local stats = require("lazy").stats()
 				local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
 
@@ -3287,37 +3327,116 @@ require("lazy").setup(plugins, opts)
 -- 	return more_preferred_colorschemes[math.random(#more_preferred_colorschemes)]
 -- end
 function rand_colorscheme()
-	math.randomseed(os.time())  -- Set the random seed based on the current time
+	math.randomseed(os.time()) -- Set the random seed based on the current time
 
 	local less_preferred_colorschemes = {
-		"blue", "zaibatsu", "darkblue", "default", "delek", "base46-ayu_light",
-		"desert", "elflord", "evening", "base46-oceanic-light", "habamax",
-		"industry", "koehler", "lunaperche", "base46-flexoki-light", "morning",
-		"murphy", "pablo", "peachpuff", "base46-flex-light", "base46-one_light",
-		"quiet", "retrobox", "base46-rosepine-dawn", "ron", "base46-blossom_light",
-		"shine", "slate", "sorbet", "catppuccin-latte", "base46-github_light",
-		"torte", "base46-everforest_light", "base46-material-lighter", "base46-gruvbox_light",
-		"base46-nano-light", "base46-onenord_light", "base46-penumbra_light", "vim",
-		"wildcharm", "tokyonight-day"
+		"blue",
+		"zaibatsu",
+		"darkblue",
+		"default",
+		"delek",
+		"base46-ayu_light",
+		"desert",
+		"elflord",
+		"evening",
+		"base46-oceanic-light",
+		"habamax",
+		"industry",
+		"koehler",
+		"lunaperche",
+		"base46-flexoki-light",
+		"morning",
+		"murphy",
+		"pablo",
+		"peachpuff",
+		"base46-flex-light",
+		"base46-one_light",
+		"quiet",
+		"retrobox",
+		"base46-rosepine-dawn",
+		"ron",
+		"base46-blossom_light",
+		"shine",
+		"slate",
+		"sorbet",
+		"catppuccin-latte",
+		"base46-github_light",
+		"torte",
+		"base46-everforest_light",
+		"base46-material-lighter",
+		"base46-gruvbox_light",
+		"base46-nano-light",
+		"base46-onenord_light",
+		"base46-penumbra_light",
+		"vim",
+		"wildcharm",
+		"tokyonight-day",
 	}
 
 	local more_preferred_colorschemes = {
-		"tokyonight","tokyodark", "tokyonight-moon", "tokyonight-night", "tokyonight-storm",
-		"catppuccin", "catppuccin-frappe", "catppuccin-macchiato", "catppuccin-mocha",
-		"base46-aquarium", "base46-ashes", "base46-ayu_dark", "base46-bearded-arc",
-		"base46-catppuccin", "base46-chadracula", "base46-chadracula-evondev",
-		"base46-chadtain", "base46-chocolate", "base46-dark_horizon", "base46-decay",
-		"base46-doomchad", "base46-everblush", "base46-everforest", "base46-falcon",
-		"base46-flexoki", "base46-gatekeeper", "base46-github_dark", "base46-gruvbox",
-		"base46-gruvchad", "base46-jabuti", "base46-jellybeans", "base46-kanagawa",
-		"base46-material-darker", "base46-melange", "base46-mito-laser", "base46-monekai",
-		"base46-monochrome", "base46-mountain", "base46-nightfox", "base46-nightlamp",
-		"base46-nightowl", "base46-nord", "base46-oceanic-next", "base46-onedark",
-		"base46-onenord", "base46-oxocarbon", "base46-palenight", "base46-pastelDark",
-		"base46-pastelbeans", "base46-penumbra_dark", "base46-radium", "base46-rosepine",
-		"base46-rxyhn", "base46-solarized_dark", "base46-solarized_osaka", "base46-sweetpastel",
-		"base46-tokyodark", "base46-tokyonight", "base46-tomorrow_night", "base46-tundra",
-		"base46-vscode_dark", "base46-wombat", "base46-yoru"
+		"tokyonight",
+		"tokyodark",
+		"tokyonight-moon",
+		"tokyonight-night",
+		"tokyonight-storm",
+		"catppuccin",
+		"catppuccin-frappe",
+		"catppuccin-macchiato",
+		"catppuccin-mocha",
+		"base46-aquarium",
+		"base46-ashes",
+		"base46-ayu_dark",
+		"base46-bearded-arc",
+		"base46-catppuccin",
+		"base46-chadracula",
+		"base46-chadracula-evondev",
+		"base46-chadtain",
+		"base46-chocolate",
+		"base46-dark_horizon",
+		"base46-decay",
+		"base46-doomchad",
+		"base46-everblush",
+		"base46-everforest",
+		"base46-falcon",
+		"base46-flexoki",
+		"base46-gatekeeper",
+		"base46-github_dark",
+		"base46-gruvbox",
+		"base46-gruvchad",
+		"base46-jabuti",
+		"base46-jellybeans",
+		"base46-kanagawa",
+		"base46-material-darker",
+		"base46-melange",
+		"base46-mito-laser",
+		"base46-monekai",
+		"base46-monochrome",
+		"base46-mountain",
+		"base46-nightfox",
+		"base46-nightlamp",
+		"base46-nightowl",
+		"base46-nord",
+		"base46-oceanic-next",
+		"base46-onedark",
+		"base46-onenord",
+		"base46-oxocarbon",
+		"base46-palenight",
+		"base46-pastelDark",
+		"base46-pastelbeans",
+		"base46-penumbra_dark",
+		"base46-radium",
+		"base46-rosepine",
+		"base46-rxyhn",
+		"base46-solarized_dark",
+		"base46-solarized_osaka",
+		"base46-sweetpastel",
+		"base46-tokyodark",
+		"base46-tokyonight",
+		"base46-tomorrow_night",
+		"base46-tundra",
+		"base46-vscode_dark",
+		"base46-wombat",
+		"base46-yoru",
 	}
 
 	local all_colorschemes = vim.tbl_extend("force", less_preferred_colorschemes, more_preferred_colorschemes)
