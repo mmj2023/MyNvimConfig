@@ -1754,7 +1754,7 @@ local plugins = {
 						-- section_separators = { left = "", right = "" },--
 						{
 							"branch",
-							icon = "",
+							icon = "",
 							color = { bg = "#303030" },
 							separator = { left = "", right = "" },
 						},
