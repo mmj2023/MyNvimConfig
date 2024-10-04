@@ -1,4 +1,29 @@
 vim.opt.expandtab = true
+local bg_color = vim.fn.synIDattr(vim.fn.hlID("Normal"), "bg")
+function runInCmd(cmd)
+	local handle
+	local stdout = vim.loop.new_pipe(false)
+	local stderr = vim.loop.new_pipe(false)
+
+	handle = vim.loop.spawn(cmd, {
+		args = {},
+		stdio = { nil, stdout, stderr },
+	}, function(code, signal)
+		stdout:close()
+		stderr:close()
+		handle:close()
+		if code ~= 0 then
+			print("Command failed with code: " .. code .. " and signal: " .. signal)
+		end
+	end)
+
+	if not handle then
+		print("Failed to run command: " .. cmd)
+		stdout:close()
+		stderr:close()
+	end
+end
+
 --  Synchronize clipboard with Windows system clipboard if running on WSL2
 local function is_wsl()
 	local file = io.popen("ls /mnt/wslg/runtime-dir 2>/dev/null")
@@ -113,7 +138,7 @@ vim.opt.smartcase = true
 vim.opt.signcolumn = "yes"
 -- keymaps
 vim.keymap.set("x", "<leader>p", '"_dp')
-vim.keymap.set("x", "<leader>tt", "<cmd>set laststatus=3<CR>", {})
+vim.keymap.set("x", "<leader>tt", ":set laststatus=3<CR>", {})
 -- vim.keymap.set("n", "<leader>y", "\"+y" )
 vim.keymap.set("v", "<leader>y", '"+y')
 vim.keymap.set("n", "<leader>d", '"_d')
@@ -121,6 +146,8 @@ vim.keymap.set("v", "<leader>d", '"_d')
 -- vim.keymap.set("n", "<Esc>", "cmd>nohlsearch<CR>", {})
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", {})
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", {})
+vim.keymap.set("v", ">", ">gv", {})
+vim.keymap.set("v", "<", "<gv", {})
 -- vim.keymap.set("n", "<Esc>", "cmd>nohlsearch<CR>", {})
 vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "Highlight when yanking (copying) text",
@@ -215,7 +242,7 @@ if not (vim.uv or vim.oop).fs_stat(lazypath) then
 	if vim.v.shell_error ~= 0 then
 		vim.api.nvim_echo({
 			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-			{ out,                            "WarningMsg" },
+			{ out, "WarningMsg" },
 			{ "\nPress any key to exit..." },
 		}, true, {})
 		vim.fn.getchar()
@@ -234,7 +261,12 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-	{ "tpope/vim-sleuth",      lazy = false },
+	{ "tpope/vim-sleuth", lazy = false },
+	{
+		"glacambre/firenvim",
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		build = ":call firenvim#install(0)",
+	},
 	{ "numToStr/Comment.nvim", lazy = false, opts = {} },
 	{ -- Adds git related signs to the gutter, as well as utilities for managing changes
 		"lewis6991/gitsigns.nvim",
@@ -258,8 +290,7 @@ local plugins = {
 		},
 		config = function(_, opts)
 			vim.keymap.set("n", "<leader>gp", "Gitsigns prev_hunk", { noremap = true, silent = true })
-			vim.keymap.set("n", "<leader>gtb", "Gitsigns toggle_current_line_blame",
-				{ noremap = true, silent = true })
+			vim.keymap.set("n", "<leader>gtb", "Gitsigns toggle_current_line_blame", { noremap = true, silent = true })
 			require("gitsigns").setup(opts)
 		end,
 		--[[
@@ -341,20 +372,58 @@ local plugins = {
 	},
 	{
 		"yardnsm/nvim-base46",
-		-- lazy = false,
-		-- priority = 1000,
+		lazy = false,
+		priority = 1000,
 		-- opts = {},
 		event = "VeryLazy",
 		config = function()
 			require("nvim-base46").setup({
 				transparent = vim.g.transparent_enabled,
+				integrations = {
+					aerial = true,
+					alpha = true,
+					cmp = true,
+					dashboard = true,
+					flash = true,
+					grug_far = true,
+					gitsigns = true,
+					headlines = true,
+					illuminate = true,
+					indent_blankline = { enabled = true },
+					leap = true,
+					lsp_trouble = true,
+					mason = true,
+					markdown = true,
+					mini = true,
+					native_lsp = {
+						enabled = true,
+						underlines = {
+							errors = { "undercurl" },
+							hints = { "undercurl" },
+							warnings = { "undercurl" },
+							information = { "undercurl" },
+						},
+					},
+					navic = { enabled = true, custom_bg = "lualine" },
+					neotest = true,
+					neotree = true,
+					noice = true,
+					notify = true,
+					semantic_tokens = true,
+					telescope = true,
+					treesitter = true,
+					treesitter_context = true,
+					which_key = true,
+					transparent = vim.g.transparent_enabled,
+				},
 			})
 		end,
 	},
 	{
 		"catppuccin/nvim",
+		lazy = false,
 		name = "catppuccin",
-		-- priority = 10000,
+		priority = 10000,
 		opts = {
 			integrations = {
 				aerial = true,
@@ -401,10 +470,48 @@ local plugins = {
 	},
 	{
 		"tiagovla/tokyodark.nvim",
-		-- priority = 10000,
+		lazy = false,
+		priority = 10000,
 		opts = {
 			-- custom options here
 			transparent = vim.g.transparent_enabled,
+			integrations = {
+				aerial = true,
+				alpha = true,
+				cmp = true,
+				dashboard = true,
+				flash = true,
+				grug_far = true,
+				gitsigns = true,
+				headlines = true,
+				illuminate = true,
+				indent_blankline = { enabled = true },
+				leap = true,
+				lsp_trouble = true,
+				mason = true,
+				markdown = true,
+				mini = true,
+				native_lsp = {
+					enabled = true,
+					underlines = {
+						errors = { "undercurl" },
+						hints = { "undercurl" },
+						warnings = { "undercurl" },
+						information = { "undercurl" },
+					},
+				},
+				navic = { enabled = true, custom_bg = "lualine" },
+				neotest = true,
+				neotree = true,
+				noice = true,
+				notify = true,
+				semantic_tokens = true,
+				telescope = true,
+				treesitter = true,
+				treesitter_context = true,
+				which_key = true,
+				transparent = vim.g.transparent_enabled,
+			},
 		},
 		config = function(_, opts)
 			require("tokyodark").setup(opts) -- calling setup is optional
@@ -414,8 +521,15 @@ local plugins = {
 	{
 		"adelarsq/image_preview.nvim",
 		event = "VeryLazy",
+		-- opts = function()
+		-- 	return {
+		-- 		backend = "wezterm",
+		-- 	}
+		-- end,
 		config = function()
-			require("image_preview").setup()
+			require("image_preview").setup({
+				backend = "wezterm",
+			})
 		end,
 	},
 	{
@@ -571,7 +685,14 @@ local plugins = {
 				--     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
 				--   },
 				-- },
-				-- pickers = {}
+				pickers = {
+                                  colorscheme = {
+					  enable_preview = true,
+				    }, -- preview the colorscheme in the picker
+				  find_files = {
+					  hidden = true, -- enable this to see hidden files
+				    }, -- find files in the current directory
+				},
 				defaults = {
 					prompt_prefix = "   ",
 					selection_caret = " ",
@@ -607,9 +728,9 @@ local plugins = {
 			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 			vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>fr", builtin.resume, { desc = "[S]earch [R]esume" })
-			vim.keymap.set("n", "<leader>f.", builtin.oldfiles,
-				{ desc = '[S]earch Recent Files ("." for repeat)' })
+			vim.keymap.set("n", "<leader>f.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
 			vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "[ ] Find existing buffers" })
+			vim.keymap.set("n", "<leader>col", builtin.colorscheme, { desc = "[ ] Find existing buffers" })
 
 			-- Slightly advanced example of overriding default behavior and theme
 			vim.keymap.set("n", "<leader>/", function()
@@ -633,6 +754,37 @@ local plugins = {
 			vim.keymap.set("n", "<leader>fmn", function()
 				builtin.find_files({ cwd = vim.fn.stdpath("config") })
 			end, { desc = "[S]earch [N]eovim files" })
+		end,
+	},
+	{
+		"folke/trouble.nvim",
+		event = "VeryLazy",
+		opts = {},
+		config = function()
+			require("trouble").setup({})
+		end,
+	},
+	{
+		"folke/flash.nvim",
+		event = "VeryLazy",
+		opts = {},
+		-- config = function()
+		-- 	require("flash").setup({})
+		-- end,
+		keys = {
+			{ "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+			{ "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+			{ "r", mode = {"o"}, function() require("flash").remote() end, desc = "Flash Remote" },
+			{ "R", mode = { "o","x" }, function() require("flash").treesitter_search() end, desc = "Flash Treesitter Search" },
+			{ "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Flash Toggle Search" },
+		},
+	},
+	{
+		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		opts = {},
+		config = function()
+			require("nvim-autopairs").setup({})
 		end,
 	},
 	{
@@ -973,8 +1125,8 @@ local plugins = {
 			})
 			require("treesitter-context").setup({
 				enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-				max_lines = 5, -- How many lines the window should span. Values <= 0 mean no limit.
-				min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+				max_lines = 4, -- How many lines the window should span. Values <= 0 mean no limit.
+				min_window_height = 4, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
 				line_numbers = true,
 				multiline_threshold = 2, -- Maximum number of lines to show for a single context
 				trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
@@ -1108,7 +1260,7 @@ local plugins = {
 						Info = " ",
 					}
 					local ret = (diag.error and icons.Error .. diag.error .. " " or "")
-					    .. (diag.warning and icons.Warn .. diag.warning or "")
+						.. (diag.warning and icons.Warn .. diag.warning or "")
 					return vim.trim(ret)
 				end,
 				-- diagnostics_update_in_insert = true,
@@ -1158,13 +1310,14 @@ local plugins = {
 	{
 		"stevearc/oil.nvim",
 		event = { "VimEnter", "BufReadPost", "BufNewFile", "BufWritePre" },
-		opts = {},
+		-- opts = {},
 		-- Optional dependencies
 		dependencies = { { "echasnovski/mini.icons", opts = {} } },
 		-- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
 		config = function()
 			require("oil").setup({
 				default_file_explorer = true,
+				-- oil.skip_confirm_for_simple_edits = true,
 				columns = {
 					"icon",
 					-- "permissions",
@@ -1196,23 +1349,6 @@ local plugins = {
 				cleanup_delay_ms = 2000,
 				show_hidden = true, -- Show hidden files
 				preview_split = "left",
-				-- float = {
-				--   padding = 2,
-				--   max_width = 90,
-				--   max_height = 0,
-				--   border = "rounded",
-				--   win_options = {
-				--       winblend = 0,
-				--   },
-				-- float = {
-				--   padding = 0,  -- Remove padding to make it more like a sidebar
-				--   max_width = 30,  -- Adjust width to match typical sidebar width
-				--   max_height = vim.o.lines,  -- Use full height of the editor
-				--   border = "none",  -- Remove border for a cleaner look
-				--   win_options = {
-				--       winblend = 0,  -- No transparency
-				--   },
-				-- },
 			})
 			-- vim.cmd[['require("oil").toggle_hidden()']]
 		end,
@@ -1736,7 +1872,7 @@ local plugins = {
 						--     },
 					},
 					lualine_y = {
-						{ "encoding",   color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
+						{ "encoding", color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
 						{ "fileformat", color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
 						{
 							"filetype",
@@ -1863,7 +1999,8 @@ local plugins = {
 					"biome",
 					"jdtls",
 					"quick_lint_js",
-					"tsserver",
+					-- "tsserver",
+					"ts_ls",
 					-- "vtsls",
 					"julials",
 					"kotlin_language_server",
@@ -2025,8 +2162,7 @@ local plugins = {
 					end,
 					capabilities = capabilities,
 					handlers = {
-						["textDocument/publishDiagnostics"] = vim.lsp.with(
-						vim.lsp.diagnostic.on_publish_diagnostics, {
+						["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
 							virtual_text = true,
 							signs = true,
 							underline = true,
@@ -2097,7 +2233,7 @@ local plugins = {
 				-- lspconfig.quick_lint_js.setup({
 				--       capabilities = capabilities,
 				--     })
-				lspconfig.tsserver.setup({
+				lspconfig.ts_ls.setup({
 					capabilities = capabilities,
 				})
 				-- lspconfig.vtsls.setup({})
@@ -2343,6 +2479,14 @@ local plugins = {
 		},
 	},
 	{
+		"ray-x/lsp_signature.nvim",
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		opts = {},
+		config = function(_, opts)
+			require("lsp_signature").setup(opts)
+		end,
+	},
+	{
 		"onsails/lspkind-nvim",
 		config = function()
 			require("lspkind").init({
@@ -2408,7 +2552,7 @@ local plugins = {
 	},
 	{
 		"xiyaowong/transparent.nvim",
-		lazy = true,
+		lazy = false,
 		config = function()
 			--setting up transparent.nvim
 			require("transparent").setup({
@@ -2453,7 +2597,26 @@ local plugins = {
 			require("transparent").clear_prefix("BufferLine")
 			-- require('transparent').clear_prefix("mason")
 			--vim.keymap.set("n", "<Space>te", ":TransparentEnable<CR>", {})
-			vim.keymap.set("n", "<Space>td", ":TransparentDisable<CR>", {})
+			vim.cmd("TransparentEnable")
+			-- 			vim.keymap.set("n", "<Space>td", function()
+			-- 				vim.cmd("TransparentDisable")
+			-- 				-- vim.fn.system("tmux set-option status-style bg=${bg}")
+			-- 				-- vim.fn.system("if [ -z \"$TMUX\" ]; then tmux set-option status-style bg=${bg}; fi")
+			-- 				-- let bg_color = synIDattr(hlID("Normal"), "bg")
+			-- 				-- vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=' . bg_color . '; fi')
+			-- 				-- " Capture the current background color
+			-- -- let bg_color = synIDattr(hlID("Normal"), "bg")
+			--
+			-- -- " Use the captured background color in a system command with proper quoting
+			-- 			--                              vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg="' . bg_color . '"; fi')
+			-- 			-- end, { noremap = true, silent = true })
+			-- 				vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=' .. bg_color .. '; fi')
+			-- 		end, {})
+			vim.keymap.set("n", "<Space>td", function()
+				vim.cmd("TransparentDisable")
+				local bg_color = vim.fn.synIDattr(vim.fn.hlID("Normal"), "bg")
+				vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=' .. bg_color .. "; fi")
+			end, { noremap = true, silent = true })
 		end,
 	},
 	-- {
@@ -2726,8 +2889,7 @@ local plugins = {
 				-- local total_plugins = #vim.tbl_keys(packer_plugins)
 				local datetime = os.date(" %d-%m-%Y   %H:%M:%S")
 				local version = vim.version()
-				local nvim_version_info = "   v" ..
-				version.major .. "." .. version.minor .. "." .. version.patch
+				local nvim_version_info = "   v" .. version.major .. "." .. version.minor .. "." .. version.patch
 				local stats = require("lazy").stats()
 				local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
 
@@ -2967,10 +3129,10 @@ local opts = {
 	},
 	performance = {
 		rtp = {
-			reset = true, -- Reset runtime path to improve startup time
+			reset = false, -- Reset runtime path to improve startup time
 		},
 		cache = {
-			enabled = true, -- Enable caching for faster startup
+			enabled = false, -- Enable caching for faster startup
 		},
 	},
 }
@@ -3126,6 +3288,8 @@ function rand_colorscheme()
 end
 
 vim.cmd("colorscheme " .. rand_colorscheme())
+-- vim.cmd("colorscheme base46-bearded-arc")
+-- vim.cmd("colorscheme base46-bearded-arc")
 -- vim.cmd("colorscheme tokyonight-storm")
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
@@ -3135,7 +3299,12 @@ function TE()
 	vim.cmd("TransparentEnable")
 end
 
-vim.keymap.set("n", "<leader>te", ":lua TE()<CR>")
+-- vim.keymap.set("n", "<leader>te", ":lua TE()<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>te", function()
+	vim.cmd("lua TE()")
+	-- vim.fn.system("if [ -z \"$TMUX\" ]; then tmux set-option status-style bg=default; fi")
+	vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=default; fi')
+end, { noremap = true, silent = true })
 -- function FI()
 -- -- --   vim.cmd("Lazy load neo-tree.nvim")
 -- -- --   vim.cmd("Neotree toggle")
