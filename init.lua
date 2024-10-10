@@ -25,16 +25,33 @@ function runInCmd(cmd)
 end
 
 --  Synchronize clipboard with Windows system clipboard if running on WSL2
+-- local function is_wsl()
+-- 	local file = io.popen("ls /mnt/wslg/runtime-dir 2>/dev/null")
+-- 	---@cast file -nil
+-- 	local output = file:read("*all")
+-- 	file:close()
+-- 	if output ~= "" then
+-- 		return true
+-- 	end
+-- 	return false
+-- end
 local function is_wsl()
-	local file = io.popen("ls /mnt/wslg/runtime-dir 2>/dev/null")
-	---@cast file -nil
-	local output = file:read("*all")
-	file:close()
-	if output ~= "" then
-		return true
-	end
-	return false
+  local osrelease_path = '/proc/sys/kernel/osrelease'
+  local file = io.open(osrelease_path, 'r')
+  if not file then
+    return false
+  end
+  local osrelease = file:read('*a')
+  file:close()
+  return osrelease:lower():match('microsoft') ~= nil
 end
+
+-- if is_wsl() then
+--   print("Running under WSL")
+-- else
+--   print("Not running under WSL")
+-- end
+
 
 if is_wsl() then
 	-- print("Running on WSL")
@@ -242,7 +259,7 @@ if not (vim.uv or vim.oop).fs_stat(lazypath) then
 	if vim.v.shell_error ~= 0 then
 		vim.api.nvim_echo({
 			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-			{ out,                            "WarningMsg" },
+			{ out, "WarningMsg" },
 			{ "\nPress any key to exit..." },
 		}, true, {})
 		vim.fn.getchar()
@@ -261,7 +278,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-	{ "tpope/vim-sleuth",      lazy = false },
+	{ "tpope/vim-sleuth", lazy = false },
 	{
 		"glacambre/firenvim",
 		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
@@ -290,8 +307,7 @@ local plugins = {
 		},
 		config = function(_, opts)
 			vim.keymap.set("n", "<leader>gp", "Gitsigns prev_hunk", { noremap = true, silent = true })
-			vim.keymap.set("n", "<leader>gtb", "Gitsigns toggle_current_line_blame",
-				{ noremap = true, silent = true })
+			vim.keymap.set("n", "<leader>gtb", "Gitsigns toggle_current_line_blame", { noremap = true, silent = true })
 			require("gitsigns").setup(opts)
 		end,
 		--[[
@@ -367,7 +383,7 @@ local plugins = {
 		-- opts = {},
 		config = function()
 			require("tokyonight").setup({
-				transparent = vim.g.transparent_enabled,
+				-- transparent = vim.g.transparent_enabled,
 			})
 		end,
 	},
@@ -529,8 +545,25 @@ local plugins = {
 		-- end,
 		config = function()
 			require("image_preview").setup({
-				backend = "wezterm",
+				-- 	backend = "wezterm",
 			})
+			-- require("neo-tree").setup({
+			-- 	filesystem = {
+			-- 		window = {
+			-- 			mappings = {
+			-- 				["<leader>p"] = "image_wezterm", -- " or another map
+			-- 			},
+			-- 		},
+			-- 		commands = {
+			-- 			image_wezterm = function(state)
+			-- 				local node = state.tree:get_node()
+			-- 				if node.type == "file" then
+			-- 					require("image_preview").PreviewImage(node.path)
+			-- 				end
+			-- 			end,
+			-- 		},
+			-- 	},
+			-- })
 		end,
 	},
 	{
@@ -729,8 +762,7 @@ local plugins = {
 			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 			vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>fr", builtin.resume, { desc = "[S]earch [R]esume" })
-			vim.keymap.set("n", "<leader>f.", builtin.oldfiles,
-				{ desc = '[S]earch Recent Files ("." for repeat)' })
+			vim.keymap.set("n", "<leader>f.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
 			vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "[ ] Find existing buffers" })
 			vim.keymap.set("n", "<leader>col", builtin.colorscheme, { desc = "[ ] Find existing buffers" })
 
@@ -1297,7 +1329,7 @@ local plugins = {
 						Info = " ",
 					}
 					local ret = (diag.error and icons.Error .. diag.error .. " " or "")
-					    .. (diag.warning and icons.Warn .. diag.warning or "")
+						.. (diag.warning and icons.Warn .. diag.warning or "")
 					return vim.trim(ret)
 				end,
 				-- diagnostics_update_in_insert = true,
@@ -1346,7 +1378,9 @@ local plugins = {
 
 	{
 		"stevearc/oil.nvim",
-		event = { "VimEnter", "BufReadPost", "BufNewFile", "BufWritePre" },
+		event = {
+			"VimEnter", --[[  "BufReadPost", "BufNewFile", "BufWritePre" ]]
+		},
 		-- opts = {},
 		-- Optional dependencies
 		dependencies = { { "echasnovski/mini.icons", opts = {} } },
@@ -1909,7 +1943,7 @@ local plugins = {
 						--     },
 					},
 					lualine_y = {
-						{ "encoding",   color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
+						{ "encoding", color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
 						{ "fileformat", color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
 						{
 							"filetype",
@@ -2199,13 +2233,12 @@ local plugins = {
 					end,
 					capabilities = capabilities,
 					handlers = {
-						["textDocument/publishDiagnostics"] = vim.lsp.with(
-							vim.lsp.diagnostic.on_publish_diagnostics, {
-								virtual_text = true,
-								signs = true,
-								underline = true,
-								update_in_insert = false,
-							}),
+						["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+							virtual_text = true,
+							signs = true,
+							underline = true,
+							update_in_insert = false,
+						}),
 					},
 					init_options = {
 						compilationDatabaseDirectory = "build",
@@ -2653,8 +2686,7 @@ local plugins = {
 			vim.keymap.set("n", "<Space>td", function()
 				vim.cmd("TransparentDisable")
 				local bg_color = vim.fn.synIDattr(vim.fn.hlID("Normal"), "bg")
-				vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=' ..
-					bg_color .. "; fi")
+				vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=' .. bg_color .. "; fi")
 			end, { noremap = true, silent = true })
 		end,
 	},
@@ -2928,8 +2960,7 @@ local plugins = {
 				-- local total_plugins = #vim.tbl_keys(packer_plugins)
 				local datetime = os.date(" %d-%m-%Y   %H:%M:%S")
 				local version = vim.version()
-				local nvim_version_info = "   v" ..
-				    version.major .. "." .. version.minor .. "." .. version.patch
+				local nvim_version_info = "   v" .. version.major .. "." .. version.minor .. "." .. version.patch
 				local stats = require("lazy").stats()
 				local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
 
@@ -3019,19 +3050,22 @@ local plugins = {
 	},
 	{
 		{
-			"hrsh7th/cmp-nvim-lsp",
-		},
-		{
-			"L3MON4D3/LuaSnip",
-			dependencies = {
-				"saadparwaiz1/cmp_luasnip",
-				"rafamadriz/friendly-snippets",
-				"petertriho/cmp-git",
-				"hrsh7th/cmp-emoji",
-			},
-		},
-		{
 			"hrsh7th/nvim-cmp",
+			-- enabled = false,
+			dependencies = {
+				{
+					"L3MON4D3/LuaSnip",
+					dependencies = {
+						{
+							"hrsh7th/cmp-nvim-lsp",
+						},
+						"saadparwaiz1/cmp_luasnip",
+						"rafamadriz/friendly-snippets",
+						"petertriho/cmp-git",
+						"hrsh7th/cmp-emoji",
+					},
+				},
+			},
 			config = function()
 				local lspkind = require("lspkind")
 				local cmp = require("cmp")
@@ -3080,6 +3114,37 @@ local plugins = {
 			end,
 		},
 	},
+	-- {
+	-- 	"saghen/blink.cmp",
+	-- 	lazy = "VeryLazy", -- lazy loading handled internally
+	-- 	-- optional: provides snippets for the snippet source
+	-- 	dependencies = { "rafamadriz/friendly-snippets",--[[  "hrsh7th/cmp-nvim-lsp"  ]]},
+	--
+	-- 	-- use a release tag to download pre-built binaries
+	-- 	-- version = 'v0.*',
+	-- 	-- OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
+	-- 	build = "cargo build --release",
+	-- 	-- On musl libc based systems you need to add this flag
+	-- 	-- build = 'RUSTFLAGS="-C target-feature=-crt-static" cargo build --release',
+	--
+	-- 	opts = {
+	-- 		-- highlight = {
+	-- 		-- 	-- sets the fallback highlight groups to nvim-cmp's highlight groups
+	-- 		-- 	-- useful for when your theme doesn't support blink.cmp
+	-- 		-- 	-- will be removed in a future release, assuming themes add support
+	-- 		-- 	use_nvim_cmp_as_default = true,
+	-- 		-- },
+	-- 		-- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+	-- 		-- adjusts spacing to ensure icons are aligned
+	-- 		nerd_font_variant = "normal",
+	--
+	-- 		-- experimental auto-brackets support
+	-- 		accept = { auto_brackets = { enabled = true } },
+	--
+	-- 		-- experimental signature help support
+	-- 		trigger = { signature_help = { enabled = true } },
+	-- 	},
+	-- },
 	{
 		"yetone/avante.nvim",
 		-- event = "VeryLazy",-- TODO: have to figure it out
@@ -3150,16 +3215,22 @@ local plugins = {
 	{
 		"nvchad/volt",
 		-- event = { "BufReadPost", "BufNewFile", "BufWritePre" },
-		event = {"VimEnter"},
+		event = { "VimEnter" },
 		-- opts = {},
 	},
 	{
 		"nvchad/menu",
 		-- event = { "BufReadPost", "BufNewFile", "BufWritePre" },
-		event = {"VimEnter"},
+		event = { "VimEnter" },
 		-- opts = {},
 		keys = {
-			{ "<leader>me", function() require("menu").open("default") end, desc = "Menu" },
+			{
+				"<leader>me",
+				function()
+					require("menu").open("default")
+				end,
+				desc = "Menu",
+			},
 		},
 	},
 	{
@@ -3563,7 +3634,7 @@ end, { noremap = true, silent = true })
 
 --
 vim.api.nvim_set_keymap("n", "<leader>fi", ":Oil<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<leader>foi", ":Oil --float<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>e", ":Oil --float<CR>", { noremap = true, silent = true })
 
 vim.keymap.set({ "n", "v", "i" }, "<C-c>", "<Esc>")
 -- vim.keymap.set("n", " nc", ":set nocursorcolumn<cr>", {})
