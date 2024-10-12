@@ -1,28 +1,28 @@
 vim.opt.expandtab = true
 local bg_color = vim.fn.synIDattr(vim.fn.hlID("Normal"), "bg")
-function runInCmd(cmd)
-	local handle
-	local stdout = vim.loop.new_pipe(false)
-	local stderr = vim.loop.new_pipe(false)
-
-	handle = vim.loop.spawn(cmd, {
-		args = {},
-		stdio = { nil, stdout, stderr },
-	}, function(code, signal)
-		stdout:close()
-		stderr:close()
-		handle:close()
-		if code ~= 0 then
-			print("Command failed with code: " .. code .. " and signal: " .. signal)
-		end
-	end)
-
-	if not handle then
-		print("Failed to run command: " .. cmd)
-		stdout:close()
-		stderr:close()
-	end
-end
+-- function runInCmd(cmd)
+-- 	local handle
+-- 	local stdout = vim.loop.new_pipe(false)
+-- 	local stderr = vim.loop.new_pipe(false)
+--
+-- 	handle = vim.loop.spawn(cmd, {
+-- 		args = {},
+-- 		stdio = { nil, stdout, stderr },
+-- 	}, function(code, signal)
+-- 		stdout:close()
+-- 		stderr:close()
+-- 		handle:close()
+-- 		if code ~= 0 then
+-- 			print("Command failed with code: " .. code .. " and signal: " .. signal)
+-- 		end
+-- 	end)
+--
+-- 	if not handle then
+-- 		print("Failed to run command: " .. cmd)
+-- 		stdout:close()
+-- 		stderr:close()
+-- 	end
+-- end
 
 --  Synchronize clipboard with Windows system clipboard if running on WSL2
 -- local function is_wsl()
@@ -36,14 +36,14 @@ end
 -- 	return false
 -- end
 local function is_wsl()
-  local osrelease_path = '/proc/sys/kernel/osrelease'
-  local file = io.open(osrelease_path, 'r')
-  if not file then
-    return false
-  end
-  local osrelease = file:read('*a')
-  file:close()
-  return osrelease:lower():match('microsoft') ~= nil
+	local osrelease_path = "/proc/sys/kernel/osrelease"
+	local file = io.open(osrelease_path, "r")
+	if not file then
+		return false
+	end
+	local osrelease = file:read("*a")
+	file:close()
+	return osrelease:lower():match("microsoft") ~= nil
 end
 
 -- if is_wsl() then
@@ -51,7 +51,6 @@ end
 -- else
 --   print("Not running under WSL")
 -- end
-
 
 if is_wsl() then
 	-- print("Running on WSL")
@@ -490,45 +489,45 @@ local plugins = {
 		lazy = false,
 		priority = 10000,
 		opts = {
-			-- custom options here
-			transparent = vim.g.transparent_enabled,
-			integrations = {
-				aerial = true,
-				alpha = true,
-				cmp = true,
-				dashboard = true,
-				flash = true,
-				grug_far = true,
-				gitsigns = true,
-				headlines = true,
-				illuminate = true,
-				indent_blankline = { enabled = true },
-				leap = true,
-				lsp_trouble = true,
-				mason = true,
-				markdown = true,
-				mini = true,
-				native_lsp = {
-					enabled = true,
-					underlines = {
-						errors = { "undercurl" },
-						hints = { "undercurl" },
-						warnings = { "undercurl" },
-						information = { "undercurl" },
-					},
-				},
-				navic = { enabled = true, custom_bg = "lualine" },
-				neotest = true,
-				neotree = true,
-				noice = true,
-				notify = true,
-				semantic_tokens = true,
-				telescope = true,
-				treesitter = true,
-				treesitter_context = true,
-				which_key = true,
-				transparent = vim.g.transparent_enabled,
-			},
+			-- -- custom options here
+			-- transparent = vim.g.transparent_enabled,
+			-- integrations = {
+			-- 	aerial = true,
+			-- 	alpha = true,
+			-- 	cmp = true,
+			-- 	dashboard = true,
+			-- 	flash = true,
+			-- 	grug_far = true,
+			-- 	gitsigns = true,
+			-- 	headlines = true,
+			-- 	illuminate = true,
+			-- 	indent_blankline = { enabled = true },
+			-- 	leap = true,
+			-- 	lsp_trouble = true,
+			-- 	mason = true,
+			-- 	markdown = true,
+			-- 	mini = true,
+			-- 	native_lsp = {
+			-- 		enabled = true,
+			-- 		underlines = {
+			-- 			errors = { "undercurl" },
+			-- 			hints = { "undercurl" },
+			-- 			warnings = { "undercurl" },
+			-- 			information = { "undercurl" },
+			-- 		},
+			-- 	},
+			-- 	navic = { enabled = true, custom_bg = "lualine" },
+			-- 	neotest = true,
+			-- 	neotree = true,
+			-- 	noice = true,
+			-- 	notify = true,
+			-- 	semantic_tokens = true,
+			-- 	telescope = true,
+			-- 	treesitter = true,
+			-- 	treesitter_context = true,
+			-- 	which_key = true,
+			-- 	transparent = vim.g.transparent_enabled,
+			-- },
 		},
 		config = function(_, opts)
 			require("tokyodark").setup(opts) -- calling setup is optional
@@ -2225,6 +2224,9 @@ local plugins = {
 				lspconfig.astro.setup({
 					capabilities = capabilities,
 				})
+				lspconfig.ast_grep.setup({
+					capabilities = capabilities,
+				})
 				lspconfig.clangd.setup({
 					cmd = { "clangd", "--background-index", "--suggest-missing-includes" },
 					filetypes = { "c", "cpp", "objc", "objcpp" },
@@ -3060,6 +3062,9 @@ local plugins = {
 							"hrsh7th/cmp-nvim-lsp",
 						},
 						"saadparwaiz1/cmp_luasnip",
+						"hrsh7th/cmp-buffer",
+						"hrsh7th/cmp-cmdline",
+						"hrsh7th/cmp-calc",
 						"rafamadriz/friendly-snippets",
 						"petertriho/cmp-git",
 						"hrsh7th/cmp-emoji",
@@ -3070,6 +3075,7 @@ local plugins = {
 				local lspkind = require("lspkind")
 				local cmp = require("cmp")
 				require("luasnip.loaders.from_vscode").lazy_load()
+				require("cmp_git").setup()
 				cmp.setup({
 					formatting = {
 						format = lspkind.cmp_format({
@@ -3103,16 +3109,61 @@ local plugins = {
 						{ name = "nvim_lsp" },
 						{ name = "luasnip" }, -- For luasnip users.
 						{ name = "emoji" },
+						{ name = "buffer" },
+						{ name = "calc" },
+						-- { name = "cmdline" },
+						{ name = "path" },
+						{ name = "git" },
 						--{ name = 'vsnip' }, -- For vsnip users.
 						-- { name = 'ultisnips' }, -- For ultisnips users.
 						-- { name = 'snippy' }, -- For snippy users.
 					}, {
-						{ name = "buffer" },
+						-- { name = "buffer" },
 						-- { name = "supermaven" },
+					}),
+				})
+				-- `/` cmdline setup.
+				cmp.setup.cmdline("/", {
+					mapping = cmp.mapping.preset.cmdline(),
+					sources = {
+						{ name = "buffer" },
+					},
+				})
+				-- `:` cmdline setup.
+				cmp.setup.cmdline(":", {
+					mapping = cmp.mapping.preset.cmdline(),
+					sources = cmp.config.sources({
+						{ name = "path" },
+					}, {
+						{
+							name = "cmdline",
+							option = {
+								ignore_cmds = { "Man", "!" },
+							},
+						},
 					}),
 				})
 			end,
 		},
+	},
+
+	{
+		"echasnovski/mini.surround",
+		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+		opts = {
+			mappings = {
+				add = "gsa",
+				delete = "gsd",
+				find = "gsf",
+				find_left = "gsF",
+				highlight = "gsh",
+				replace = "gsr",
+				update_n_lines = "gsn",
+			},
+		},
+		-- config = function()
+		-- require("mini").setup {
+		-- end,
 	},
 	-- {
 	-- 	"saghen/blink.cmp",
