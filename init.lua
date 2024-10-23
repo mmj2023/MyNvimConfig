@@ -279,6 +279,23 @@ vim.opt.rtp:prepend(lazypath)
 local plugins = {
 	{ "tpope/vim-sleuth", lazy = false },
 	{
+		"christoomey/vim-tmux-navigator",
+		cmd = {
+			"TmuxNavigateLeft",
+			"TmuxNavigateDown",
+			"TmuxNavigateUp",
+			"TmuxNavigateRight",
+			"TmuxNavigatePrevious",
+		},
+		keys = {
+			{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+			{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+			{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+		},
+	},
+	{
 		"glacambre/firenvim",
 		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
 		build = ":call firenvim#install(0)",
@@ -342,7 +359,7 @@ local plugins = {
 		"tpope/vim-fugitive",
 		event = { "BufReadPost", "BufNewFile", "BufWritePre" },
 		-- opts = {},
-		-- cmd = "Git",
+		cmd = "Git",
 		keys = {
 			{ "<leader>gs", vim.cmd.Git, desc = "Neogit Status" },
 			-- 		{ "<leader>gd", function() require("neogit").open("diffview") end, desc = "Neogit Diff" },
@@ -850,9 +867,15 @@ local plugins = {
 	{
 		"windwp/nvim-autopairs",
 		event = "InsertEnter",
-		opts = {},
-		config = function()
-			require("nvim-autopairs").setup({})
+		opts = {
+			fast_wrap = {},
+			disable_filetype = { "TelescopePrompt", "vim" },
+		},
+		config = function(_, opts)
+			require("nvim-autopairs").setup(opts)
+			-- setup cmp for autopairs taken from nvchad
+			local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+			require("cmp").event:on("confirm_done", cmp_autopairs.on_confirm_done())
 		end,
 	},
 	{
@@ -1387,7 +1410,7 @@ local plugins = {
 		config = function()
 			require("oil").setup({
 				default_file_explorer = true,
-				-- oil.skip_confirm_for_simple_edits = true,
+				-- skip_confirm_for_simple_edits = true,
 				columns = {
 					"icon",
 					-- "permissions",
@@ -1413,8 +1436,8 @@ local plugins = {
 					concealcursor = "nvic",
 					signcolumn = "yes:2",
 				},
-				delete_to_trash = false,
-				skip_confirm_for_simple_edits = false,
+				delete_to_trash = true,
+				skip_confirm_for_simple_edits = true,
 				prompt_save_on_select_new_entry = true,
 				cleanup_delay_ms = 2000,
 				show_hidden = true, -- Show hidden files
@@ -2288,6 +2311,17 @@ local plugins = {
 				lspconfig.graphql.setup({
 					capabilities = capabilities,
 				})
+				lspconfig.ocaml_lsp.setup({
+					settings = {
+						ocaml_lsp_server = {
+							command = "ocaml-lsp-server",
+							filetypes = { "ocaml" },
+							root_dir = function(fname)
+								return util.root_pattern(".opam", "dune") or util.path.dirname(fname)
+							end,
+						},
+					},
+				})
 				lspconfig.htmx.setup({
 					capabilities = capabilities,
 				})
@@ -3101,9 +3135,11 @@ local plugins = {
 					mapping = cmp.mapping.preset.insert({
 						["<C-b>"] = cmp.mapping.scroll_docs(-4),
 						["<C-f>"] = cmp.mapping.scroll_docs(4),
+						["<C-p>"] = cmp.mapping.select_prev_item(),
+						["<C-n>"] = cmp.mapping.select_next_item(),
 						["<C-Space>"] = cmp.mapping.complete(),
 						["<C-e>"] = cmp.mapping.abort(),
-						["<CR>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+						["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
 					}),
 					sources = cmp.config.sources({
 						{ name = "nvim_lsp" },
@@ -3134,6 +3170,7 @@ local plugins = {
 					mapping = cmp.mapping.preset.cmdline(),
 					sources = cmp.config.sources({
 						{ name = "path" },
+						{ name = "calc" },
 					}, {
 						{
 							name = "cmdline",
@@ -3711,6 +3748,20 @@ function toggle_hlsearch()
 		vim.cmd("set hlsearch")
 	end
 end
+
+-- Function to insert a comment line
+function insert_comment_line()
+	local comment_line = string.rep("-", 80)
+	vim.api.nvim_put({ comment_line }, "l", true, true)
+	vim.cmd("normal! k")
+	-- vim.cmd("normal! gcc")
+	local config = require("Comment.config"):get()
+	require("Comment.api").toggle.linewise.current(nil, config)
+	vim.cmd("normal! j")
+end
+
+-- Map <leader>com to the function
+vim.api.nvim_set_keymap("n", "<leader>com", ":lua insert_comment_line()<CR>", { noremap = true, silent = true })
 
 vim.keymap.set("n", "<leader>hl", ":lua toggle_hlsearch()<cr>", {})
 vim.keymap.set("n", "<leader>bn", ":bn<CR>", { noremap = true, silent = true }) --uffernext<cr>", {})
