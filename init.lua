@@ -301,6 +301,7 @@ local plugins = {
 		build = ":call firenvim#install(0)",
 	},
 	{ "numToStr/Comment.nvim", lazy = false, opts = {} },
+	{'nvim-java/nvim-java'},
 	{ -- Adds git related signs to the gutter, as well as utilities for managing changes
 		"lewis6991/gitsigns.nvim",
 		event = "VeryLazy",
@@ -2334,6 +2335,7 @@ local plugins = {
 				lspconfig.biome.setup({
 					capabilities = capabilities,
 				})
+				-- require('java').setup()
 				lspconfig.jdtls.setup({
 					capabilities = capabilities,
 				})
@@ -3767,6 +3769,12 @@ vim.keymap.set("n", "<leader>hl", ":lua toggle_hlsearch()<cr>", {})
 vim.keymap.set("n", "<leader>bn", ":bn<CR>", { noremap = true, silent = true }) --uffernext<cr>", {})
 vim.keymap.set("n", "<leader>bp", ":bp<CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<leader>so", "<cmd>source $MYVIMRC<CR>", { noremap = true, silent = true })
+vim.api.nvim_create_autocmd("VimLeave", {
+    callback = function()
+        vim.fn.system("tmux set-option status-style bg=default")
+    end,
+})
+
 -- vim.g.transparent_groups = vim.list_extend(
 --   vim.g.transparent_groups or {},
 --   vim.tbl_map(function(v)
