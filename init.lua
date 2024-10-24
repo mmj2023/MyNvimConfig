@@ -3769,11 +3769,24 @@ vim.keymap.set("n", "<leader>hl", ":lua toggle_hlsearch()<cr>", {})
 vim.keymap.set("n", "<leader>bn", ":bn<CR>", { noremap = true, silent = true }) --uffernext<cr>", {})
 vim.keymap.set("n", "<leader>bp", ":bp<CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<leader>so", "<cmd>source $MYVIMRC<CR>", { noremap = true, silent = true })
+vim.api.nvim_create_autocmd("VimEnter", {
+	callback = function()
+		local in_tmux = os.getenv("TMUX") ~= nil
+		if in_tmux then
+			-- vim.fn.system("tmux set-option status-style bg=default")
+			vim.fn.system('tmux set status-right "#[fg=${default_fg},bg=${bg}] 󰃮 %Y-%m-%d 󱑒 %H:%M "')
+			vim.fn.system("tmux set-option status-style bg=default")
+			-- vim.fn.system("tmux source-file ~/.tmux.conf")
+		end
+	end,
+})
 vim.api.nvim_create_autocmd("VimLeave", {
 	callback = function()
 		local in_tmux = os.getenv("TMUX") ~= nil
 		if in_tmux then
-			vim.fn.system("tmux set-option status-style bg=default")
+			vim.fn.system('tmux set status-right "#[fg=${default_fg},bg=${bg}] 󰃮 %Y-%m-%d "')
+			vim.fn.system('tmux set-option status-style bg=default')
+			-- vim.fn.system("tmux source-file ~/.tmux.conf")
 		end
 	end,
 })
