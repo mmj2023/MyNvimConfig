@@ -258,7 +258,7 @@ if not (vim.uv or vim.oop).fs_stat(lazypath) then
 	if vim.v.shell_error ~= 0 then
 		vim.api.nvim_echo({
 			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-			{ out, "WarningMsg" },
+			{ out,                            "WarningMsg" },
 			{ "\nPress any key to exit..." },
 		}, true, {})
 		vim.fn.getchar()
@@ -277,7 +277,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
-	{ "tpope/vim-sleuth", lazy = false },
+	{ "tpope/vim-sleuth",      lazy = false },
 	{
 		"christoomey/vim-tmux-navigator",
 		cmd = {
@@ -288,10 +288,10 @@ local plugins = {
 			"TmuxNavigatePrevious",
 		},
 		keys = {
-			{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-			{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-			{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+			{ "<c-h>",  "<cmd><C-U>TmuxNavigateLeft<cr>" },
+			{ "<c-j>",  "<cmd><C-U>TmuxNavigateDown<cr>" },
+			{ "<c-k>",  "<cmd><C-U>TmuxNavigateUp<cr>" },
+			{ "<c-l>",  "<cmd><C-U>TmuxNavigateRight<cr>" },
 			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
 		},
 	},
@@ -324,7 +324,8 @@ local plugins = {
 		},
 		config = function(_, opts)
 			vim.keymap.set("n", "<leader>gp", "Gitsigns prev_hunk", { noremap = true, silent = true })
-			vim.keymap.set("n", "<leader>gtb", "Gitsigns toggle_current_line_blame", { noremap = true, silent = true })
+			vim.keymap.set("n", "<leader>gtb", "Gitsigns toggle_current_line_blame",
+				{ noremap = true, silent = true })
 			require("gitsigns").setup(opts)
 		end,
 		--[[
@@ -779,7 +780,8 @@ local plugins = {
 			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
 			vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
 			vim.keymap.set("n", "<leader>fr", builtin.resume, { desc = "[S]earch [R]esume" })
-			vim.keymap.set("n", "<leader>f.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+			vim.keymap.set("n", "<leader>f.", builtin.oldfiles,
+				{ desc = '[S]earch Recent Files ("." for repeat)' })
 			vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "[ ] Find existing buffers" })
 			vim.keymap.set("n", "<leader>col", builtin.colorscheme, { desc = "[ ] Find existing buffers" })
 
@@ -1352,7 +1354,7 @@ local plugins = {
 						Info = " ",
 					}
 					local ret = (diag.error and icons.Error .. diag.error .. " " or "")
-						.. (diag.warning and icons.Warn .. diag.warning or "")
+					    .. (diag.warning and icons.Warn .. diag.warning or "")
 					return vim.trim(ret)
 				end,
 				-- diagnostics_update_in_insert = true,
@@ -1966,7 +1968,7 @@ local plugins = {
 						--     },
 					},
 					lualine_y = {
-						{ "encoding", color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
+						{ "encoding",   color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
 						{ "fileformat", color = { bg = "#303030" }, padding = { left = 1, right = 1 } },
 						{
 							"filetype",
@@ -2259,12 +2261,13 @@ local plugins = {
 					end,
 					capabilities = capabilities,
 					handlers = {
-						["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
-							virtual_text = true,
-							signs = true,
-							underline = true,
-							update_in_insert = false,
-						}),
+						["textDocument/publishDiagnostics"] = vim.lsp.with(
+							vim.lsp.diagnostic.on_publish_diagnostics, {
+								virtual_text = true,
+								signs = true,
+								underline = true,
+								update_in_insert = false,
+							}),
 					},
 					init_options = {
 						compilationDatabaseDirectory = "build",
@@ -2312,17 +2315,44 @@ local plugins = {
 				lspconfig.graphql.setup({
 					capabilities = capabilities,
 				})
-				lspconfig.ocaml_lsp.setup({
-					settings = {
-						ocaml_lsp_server = {
-							command = "ocaml-lsp-server",
-							filetypes = { "ocaml" },
-							root_dir = function(fname)
-								return util.root_pattern(".opam", "dune") or util.path.dirname(fname)
+				-- format on save
+				local on_attach = function(client, bufnr)
+					if client.server_capabilities.documentFormattingProvider then
+						vim.api.nvim_create_autocmd("BufWritePre", {
+							group = vim.api.nvim_create_augroup("Format", { clear = true }),
+							buffer = bufnr,
+							callback = function()
+								vim.lsp.buf.formatting_seq_sync()
 							end,
-						},
-					},
+						})
+					end
+				end
+				local status, lsp = pcall(require, "lspconfig")
+				lspconfig.ocamllsp.setup({
+					cmd = { "ocamllsp" },
+					filetypes = { "ocaml", "ocaml.menhir", "ocaml.interface", "ocaml.ocamllex", "reason", "dune" },
+					root_dir = lsp.util.root_pattern(
+						"*.opam",
+						"esy.json",
+						"package.json",
+						".git",
+						"dune-project",
+						"dune-workspace"
+					),
+					on_attach = on_attach,
+					capabilities = capabilities,
 				})
+				-- lspconfig.ocaml_lsp.setup({
+				-- 	settings = {
+				-- 		ocaml_lsp_server = {
+				-- 			command = "ocaml-lsp-server",
+				-- 			filetypes = { "ocaml" },
+				-- 			root_dir = function(fname)
+				-- 				return util.root_pattern(".opam", "dune") or util.path.dirname(fname)
+				-- 			end,
+				-- 		},
+				-- 	},
+				-- })
 				lspconfig.htmx.setup({
 					capabilities = capabilities,
 				})
@@ -2724,7 +2754,8 @@ local plugins = {
 			vim.keymap.set("n", "<Space>td", function()
 				vim.cmd("TransparentDisable")
 				local bg_color = vim.fn.synIDattr(vim.fn.hlID("Normal"), "bg")
-				vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=' .. bg_color .. "; fi")
+				vim.fn.system('if [ -n "$TMUX" ]; then tmux set-option status-style bg=' ..
+					bg_color .. "; fi")
 			end, { noremap = true, silent = true })
 		end,
 	},
@@ -2998,7 +3029,8 @@ local plugins = {
 				-- local total_plugins = #vim.tbl_keys(packer_plugins)
 				local datetime = os.date(" %d-%m-%Y   %H:%M:%S")
 				local version = vim.version()
-				local nvim_version_info = "   v" .. version.major .. "." .. version.minor .. "." .. version.patch
+				local nvim_version_info = "   v" ..
+				    version.major .. "." .. version.minor .. "." .. version.patch
 				local stats = require("lazy").stats()
 				local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
 
@@ -3774,7 +3806,9 @@ vim.api.nvim_create_autocmd("VimEnter", {
 		local in_tmux = os.getenv("TMUX") ~= nil
 		if in_tmux then
 			-- vim.fn.system("tmux set-option status-style bg=default")
-			vim.fn.system('tmux set status-right "#[fg=${default_fg},bg=${bg}] 󰃮 %Y-%m-%d 󱑒 %H:%M "')
+			vim.fn.system(
+				'tmux set status-right "#{#[bg=#{default_fg},bold]}#[fg=${default_fg},bg=${bg}] 󰃮 %Y-%m-%d 󱑒 %H:%M "'
+			)
 			vim.fn.system("tmux set-option status-style bg=default")
 			-- vim.fn.system("tmux source-file ~/.tmux.conf")
 		end
@@ -3784,9 +3818,24 @@ vim.api.nvim_create_autocmd("VimLeave", {
 	callback = function()
 		local in_tmux = os.getenv("TMUX") ~= nil
 		if in_tmux then
-			vim.fn.system('tmux set status-right "#[fg=${default_fg},bg=${bg}] 󰃮 %Y-%m-%d "')
-			vim.fn.system('tmux set-option status-style bg=default')
+			vim.fn.system(
+				'tmux set status-right "#{#[bg=#{default_fg},bold]}#[fg=${default_fg},bg=${bg}] 󰃮 %Y-%m-%d "'
+			)
+			vim.fn.system("tmux set-option status-style bg=default")
 			-- vim.fn.system("tmux source-file ~/.tmux.conf")
+		end
+	end,
+})
+-- Create an augroup named "RestoreCursorPosition"
+local group = vim.api.nvim_create_augroup("RestoreCursorPosition", { clear = true })
+-- Define an autocommand within that group
+vim.api.nvim_create_autocmd("BufReadPost", {
+	group = group,
+	pattern = "*",
+	callback = function()
+		local pos = vim.fn.line("'\"")
+		if pos > 1 and pos <= vim.fn.line("$") then
+			vim.api.nvim_command("normal! g`\"")
 		end
 	end,
 })
