@@ -61,7 +61,7 @@ External Requirements:
 <!---->
 <!-- </details> -->
 
-<details><summary>Use the repo as your starter <a href="https://github.com/mmj2023/MyNvimConfig">config</a></summary>
+<details><summary>You can use this repo as your starter config(You shouldn't if you don't know what you are doing, the Treesitter, Lsp and linter setup needs to be improved.) but you probably wanna start with something like <a href="https://github.com/nvim-lua/kickstart.nvim">kickstart.nvim</a></summary>
 
 - Make a backup of your current Neovim files:
 
