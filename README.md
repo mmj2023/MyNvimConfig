@@ -27,7 +27,7 @@ Although the ui aspects might be pleasing. It has a ton of lsp setups, linters a
 ## Installation
 ### Install Neovim
 
-MyNvimConfig targets *only* the most recent stable release of Neovim.(still differences might exist)
+MyNvimConfig targets *only* the most recent stable release of Neovim(still differences might exist).Lastest stable release of Neovim
 ['stable'](https://github.com/neovim/neovim/releases/tag/stable) and latest
 ['nightly'](https://github.com/neovim/neovim/releases/tag/nightly) of Neovim.
 If you are experiencing issues, please make sure you have the latest versions.
@@ -103,6 +103,6 @@ External Requirements:
   ## Credits
 
 - [Kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim)
-- [LazyVim](https://github.com/AstroNvim/AstroNvim)
+- [LazyVim](https://github.com/LazyVim/LazyVim)
 - [NvChad](https://github.com/NvChad/NvChad)
-- [AstroNvim](https://github.com/LazyVim/LazyVim)
+- [AstroNvim](https://github.com/AstroNvim/AstroNvim)
