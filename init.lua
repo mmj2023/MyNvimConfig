@@ -685,616 +685,6 @@ local plugins = {
     -- 		end,
     -- 	},
     -- },
-    { -- Fuzzy Finder (files, lsp, etc)
-        'nvim-telescope/telescope.nvim',
-        event = 'VimEnter',
-        branch = '0.1.x',
-        cmd = 'Telescope',
-        dependencies = {
-            'nvim-lua/plenary.nvim',
-            { -- If encountering errors, see telescope-fzf-native README for installation instructions
-                'nvim-telescope/telescope-fzf-native.nvim',
-
-                -- `build` is used to run some command when the plugin is installed/updated.
-                -- This is only run then, not every time Neovim starts up.
-                build = 'make',
-
-                -- `cond` is a condition used to determine whether this plugin should be
-                -- installed and loaded.
-                cond = function()
-                    return vim.fn.executable('make') == 1
-                end,
-            },
-            { 'nvim-telescope/telescope-ui-select.nvim' },
-
-            -- Useful for getting pretty icons, but requires a Nerd Font.
-            -- { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
-        },
-        config = function()
-            -- Telescope is a fuzzy finder that comes with a lot of different things that
-            -- it can fuzzy find! It's more than just a "file finder", it can search
-            -- many different aspects of Neovim, your workspace, LSP, and more!
-            --
-            -- The easiest way to use Telescope, is to start by doing something like:
-            --  :Telescope help_tags
-            --
-            -- After running this command, a window will open up and you're able to
-            -- type in the prompt window. You'll see a list of `help_tags` options and
-            -- a corresponding preview of the help.
-            --
-            -- Two important keymaps to use while in Telescope are:
-            --  - Insert mode: <c-/>
-            --  - Normal mode: ?
-            --
-            -- This opens a window that shows you all of the keymaps for the current
-            -- Telescope picker. This is really useful to discover what Telescope can
-            -- do as well as how to actually do it!
-
-            -- [[ Configure Telescope ]]
-            -- See `:help telescope` and `:help telescope.setup()`
-            require('telescope').setup({
-                -- You can put your default mappings / updates / etc. in here
-                --  All the info you're looking for is in `:help telescope.setup()`
-                --
-                -- defaults = {
-                --   mappings = {
-                --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-                --   },
-                -- },
-                pickers = {
-                    colorscheme = {
-                        enable_preview = true,
-                    },                 -- preview the colorscheme in the picker
-                    find_files = {
-                        hidden = true, -- enable this to see hidden files
-                    },                 -- find files in the current directory
-                },
-                defaults = {
-                    prompt_prefix = '   ',
-                    selection_caret = ' ',
-                    entry_prefix = ' ',
-                    sorting_strategy = 'ascending',
-                    layout_config = {
-                        horizontal = {
-                            prompt_position = 'top',
-                            preview_width = 0.55,
-                        },
-                        width = 0.87,
-                        height = 0.80,
-                    },
-                },
-                extensions = {
-                    ['ui-select'] = {
-                        require('telescope.themes').get_dropdown(),
-                    },
-                },
-            })
-
-            -- Enable Telescope extensions if they are installed
-            pcall(require('telescope').load_extension, 'fzf')
-            pcall(require('telescope').load_extension, 'ui-select')
-
-            -- See `:help telescope.builtin`
-            local builtin = require('telescope.builtin')
-            vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = '[S]earch [H]elp' })
-            vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-            vim.keymap.set('n', '<leader><leader>', builtin.find_files, { desc = '[S]earch [F]iles' })
-            vim.keymap.set('n', '<leader>fs', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
-            vim.keymap.set('n', '<leader>fw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-            vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-            vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
-            vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[S]earch [R]esume' })
-            vim.keymap.set('n', '<leader>f.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-            vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = '[ ] Find existing buffers' })
-            vim.keymap.set('n', '<leader>col', builtin.colorscheme, { desc = '[ ] Find existing buffers' })
-
-            -- Slightly advanced example of overriding default behavior and theme
-            vim.keymap.set('n', '<leader>/', function()
-                -- You can pass additional configuration to Telescope to change the theme, layout, etc.
-                builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown({
-                    winblend = 10,
-                    previewer = false,
-                }))
-            end, { desc = '[/] Fuzzily search in current buffer' })
-
-            -- It's also possible to pass additional configuration options.
-            --  See `:help telescope.builtin.live_grep()` for information about particular keys
-            vim.keymap.set('n', '<leader>s/', function()
-                builtin.live_grep({
-                    grep_open_files = true,
-                    prompt_title = 'Live Grep in Open Files',
-                })
-            end, { desc = '[S]earch [/] in Open Files' })
-
-            -- Shortcut for searching your Neovim configuration files
-            vim.keymap.set('n', '<leader>fmn', function()
-                builtin.find_files({ cwd = vim.fn.stdpath('config') })
-            end, { desc = '[S]earch [N]eovim files' })
-        end,
-    },
-    {
-        'folke/trouble.nvim',
-        event = 'VeryLazy',
-        opts = {},
-        config = function()
-            require('trouble').setup({})
-        end,
-    },
-    {
-        'folke/flash.nvim',
-        event = 'VeryLazy',
-        opts = {},
-        -- config = function()
-        -- 	require("flash").setup({})
-        -- end,
-        keys = {
-            {
-                's',
-                mode = { 'n', 'x', 'o' },
-                function()
-                    require('flash').jump()
-                end,
-                desc = 'Flash',
-            },
-            {
-                'S',
-                mode = { 'n', 'x', 'o' },
-                function()
-                    require('flash').treesitter()
-                end,
-                desc = 'Flash Treesitter',
-            },
-            {
-                'r',
-                mode = { 'o' },
-                function()
-                    require('flash').remote()
-                end,
-                desc = 'Flash Remote',
-            },
-            {
-                'R',
-                mode = { 'o', 'x' },
-                function()
-                    require('flash').treesitter_search()
-                end,
-                desc = 'Flash Treesitter Search',
-            },
-            {
-                '<c-s>',
-                mode = { 'c' },
-                function()
-                    require('flash').toggle()
-                end,
-                desc = 'Flash Toggle Search',
-            },
-        },
-    },
-    {
-        'windwp/nvim-autopairs',
-        event = 'InsertEnter',
-        opts = {
-            fast_wrap = {},
-            disable_filetype = { 'TelescopePrompt', 'vim' },
-        },
-        config = function(_, opts)
-            require('nvim-autopairs').setup(opts)
-            -- setup cmp for autopairs taken from nvchad
-            local cmp_autopairs = require('nvim-autopairs.completion.cmp')
-            require('cmp').event:on('confirm_done', cmp_autopairs.on_confirm_done())
-        end,
-    },
-    {
-        'chipsenkbeil/distant.nvim',
-        event = 'VeryLazy',
-        branch = 'v0.3',
-        config = function()
-            require('distant'):setup()
-        end,
-    },
-    {
-        'ThePrimeagen/harpoon',
-        branch = 'harpoon2',
-        dependencies = { 'nvim-lua/plenary.nvim' },
-        opts = {
-            menu = {
-                width = vim.api.nvim_win_get_width(0) - 4,
-            },
-            settings = {
-                save_on_toggle = true,
-            },
-        },
-        keys = function()
-            local keys = {
-                {
-                    '<leader>H',
-                    function()
-                        require('harpoon'):list():add()
-                    end,
-                    desc = 'Harpoon File',
-                },
-                {
-                    '<leader>h',
-                    function()
-                        local harpoon = require('harpoon')
-                        harpoon.ui:toggle_quick_menu(harpoon:list())
-                    end,
-                    desc = 'Harpoon Quick Menu',
-                },
-            }
-
-            for i = 1, 8 do
-                table.insert(keys, {
-                    '<leader>' .. i,
-                    function()
-                        require('harpoon'):list():select(i)
-                    end,
-                    desc = 'Harpoon to File ' .. i,
-                })
-            end
-            return keys
-        end,
-        -- config = function()
-        -- 	local harpoon = require("harpoon")
-        -- 	-- REQUIRED
-        -- 	harpoon:setup()
-        -- 	-- REQUIRED
-        --
-        -- 	-- local mark = require("harpoon.mark")
-        -- 	-- local ui = require("harpoon.ui")
-        -- 	vim.keymap.set("n", "<leader>+", function()
-        -- 		harpoon:list():add()
-        -- 	end)
-        -- 	vim.keymap.set("n", "<C-e>", function()
-        -- 		harpoon.ui:toggle_quick_menu(harpoon:list())
-        -- 	end)
-        --
-        -- 	vim.keymap.set("n", "<C-Up>", function()
-        -- 		harpoon:list():select(1)
-        -- 	end, { noremap = true, silent = true })
-        -- 	vim.keymap.set("n", "<C-Down>", function()
-        -- 		harpoon:list():select(2)
-        -- 	end, { noremap = true, silent = true })
-        -- 	vim.keymap.set("n", "<C-Left>", function()
-        -- 		harpoon:list():select(3)
-        -- 	end, { noremap = true, silent = true })
-        -- 	vim.keymap.set("n", "<C-Right>", function()
-        -- 		harpoon:list():select(4)
-        -- 	end, { noremap = true, silent = true })
-        -- end,
-    },
-    {
-        {
-            'folke/playground',
-            event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
-        },
-        -- event = { "BufReadPost", "BufNewFile", "BufWritePre" }, },
-        {
-            'nvim-treesitter/nvim-treesitter-textobjects',
-            event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
-        },
-        {
-            'nvim-treesitter/nvim-treesitter-refactor',
-            event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
-        },
-        {
-            'nvim-treesitter/nvim-treesitter-context',
-            event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
-        },
-        {
-            'windwp/nvim-ts-autotag',
-            event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
-        },
-        'nvim-treesitter/nvim-treesitter',
-        event = { 'BufNewFile', 'BufReadPre' },
-        build = ':TSUpdate',
-        dependencies = {
-            'nvim-treesitter/nvim-treesitter-textobjects',
-            'nvim-treesitter/nvim-treesitter-refactor',
-            'nvim-treesitter/nvim-treesitter-context',
-            'windwp/nvim-ts-autotag',
-        },
-        config = function()
-            --setting up treesitter
-            playground = {
-                enable = true,
-                disable = {},
-                updatetime = 25,         -- Debounced time for highlighting nodes in the playground from source code
-                persist_queries = false, -- Whether the query persists across vim sessions
-                keybindings = {
-                    toggle_query_editor = 'o',
-                    toggle_hl_groups = 'i',
-                    toggle_injected_languages = 't',
-                    toggle_anonymous_nodes = 'a',
-                    toggle_language_display = 'I',
-                    focus_language = 'f',
-                    unfocus_language = 'F',
-                    update = 'R',
-                    goto_node = '<cr>',
-                    show_help = '?',
-                },
-            }
-            local configs = require('nvim-treesitter.configs')
-            configs.setup({
-                autotag = {
-                    enable = true,
-                },
-                ensure_installed = {
-                    'help',
-                    'c',
-                    'cpp',
-                    'haskell',
-                    'http',
-                    'lua',
-                    'vim',
-                    'vimdoc',
-                    'query',
-                    'elixir',
-                    'heex',
-                    'javascript',
-                    'html',
-                    'bash',
-                    'asm',
-                    'cuda',
-                    'css',
-                    'dockerfile',
-                    'elixir',
-                    'gitignore',
-                    'git_config',
-                    'gitcommit',
-                    'gitattributes',
-                    'markdown',
-                    'go',
-                    'json',
-                    -- "latex",
-                    'htmldjango',
-                    'java',
-                    'json5',
-                    'julia',
-                    'markdown_inline',
-                    'kotlin',
-                    'latex',
-                    'luadoc',
-                    'make',
-                    'nix',
-                    'ocaml',
-                    'php',
-                    'python',
-                    'r',
-                    'ruby',
-                    'rust',
-                    'sql',
-                    'swift',
-                    'toml',
-                    'typescript',
-                    'xml',
-                    'yaml',
-                    'zig',
-                },
-                --sync_install = false,
-                auto_install = true,
-                highlight = {
-                    enable = true,
-                    additional_vim_regex_highlighting = { 'ruby' },
-                },
-                indent = { enable = true }, -- disable = { "ruby" }
-                refactor = {
-                    highlight_current_scope = { enable = true },
-                    highlight_definitions = {
-                        enable = true,
-                        -- Set to false if you have an `updatetime` of ~100.
-                        clear_on_cursor_move = true,
-                    },
-                    navigation = {
-                        enable = true,
-                        -- Assign keymaps to false to disable them, e.g. `goto_definition = false`.
-                        keymaps = {
-                            goto_definition_lsp_fallback = 'gd',
-                            list_definitions = 'gnD',
-                            list_definitions_toc = 'gO',
-                            goto_next_usage = '<a-*>',
-                            goto_previous_usage = '<a-#>',
-                        },
-                    },
-                    smart_rename = {
-                        enable = true,
-                        -- Assign keymaps to false to disable them, e.g. `smart_rename = false`.
-                        keymaps = {
-                            smart_rename = 'grr',
-                        },
-                    },
-                },
-                textobjects = {
-                    select = {
-                        enable = true,
-
-                        -- Automatically jump forward to textobj, similar to targets.vim
-                        lookahead = true,
-
-                        keymaps = {
-                            -- You can use the capture groups defined in textobjects.scm
-                            ['af'] = '@function.outer',
-                            ['if'] = '@function.inner',
-                            ['ac'] = '@class.outer',
-                            -- You can optionally set descriptions to the mappings (used in the desc parameter of
-                            -- nvim_buf_set_keymap) which plugins like which-key display
-                            ['ic'] = { query = '@class.inner', desc = 'Select inner part of a class region' },
-                            -- You can also use captures from other query groups like `locals.scm`
-                            ['as'] = { query = '@scope', query_group = 'locals', desc = 'Select language scope' },
-                        },
-                        -- You can choose the select mode (default is charwise 'v')
-                        --
-                        -- Can also be a function which gets passed a table with the keys
-                        -- * query_string: eg '@function.inner'
-                        -- * method: eg 'v' or 'o'
-                        -- and should return the mode ('v', 'V', or '<c-v>') or a table
-                        -- mapping query_strings to modes.
-                        selection_modes = {
-                            ['@parameter.outer'] = 'v', -- charwise
-                            ['@function.outer'] = 'V',  -- linewise
-                            ['@class.outer'] = '<c-v>', -- blockwise
-                        },
-                        -- If you set this to `true` (default is `false`) then any textobject is
-                        -- extended to include preceding or succeeding whitespace. Succeeding
-                        -- whitespace has priority in order to act similarly to eg the built-in
-                        -- `ap`.
-                        --
-                        -- Can also be a function which gets passed a table with the keys
-                        -- * query_string: eg '@function.inner'
-                        -- * selection_mode: eg 'v'
-                        -- and should return true or false
-                        include_surrounding_whitespace = true,
-                    },
-
-                    swap = {
-                        enable = true,
-                        swap_next = {
-                            ['<leader>a'] = '@parameter.inner',
-                        },
-                        swap_previous = {
-                            ['<leader>A'] = '@parameter.inner',
-                        },
-                    },
-                    move = {
-                        enable = true,
-                        set_jumps = true, -- whether to set jumps in the jumplist
-                        goto_next_start = {
-                            [']m'] = '@function.outer',
-                            [']]'] = { query = '@class.outer', desc = 'Next class start' },
-                            --
-                            -- You can use regex matching (i.e. lua pattern) and/or pass a list in a "query" key to group multiple queries.
-                            [']o'] = '@loop.*',
-                            -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
-                            --
-                            -- You can pass a query group to use query from `queries/<lang>/<query_group>.scm file in your runtime path.
-                            -- Below example nvim-treesitter's `locals.scm` and `folds.scm`. They also provide highlights.scm and indent.scm.
-                            [']s'] = { query = '@scope', query_group = 'locals', desc = 'Next scope' },
-                            [']z'] = { query = '@fold', query_group = 'folds', desc = 'Next fold' },
-                        },
-                        goto_next_end = {
-                            [']M'] = '@function.outer',
-                            [']['] = '@class.outer',
-                        },
-                        goto_previous_start = {
-                            ['[m'] = '@function.outer',
-                            ['[['] = '@class.outer',
-                        },
-                        goto_previous_end = {
-                            ['[M'] = '@function.outer',
-                            ['[]'] = '@class.outer',
-                        },
-                        -- Below will go to either the start or the end, whichever is closer.
-                        -- Use if you want more granular movements
-                        -- Make it even more gradual by adding multiple queries and regex.
-                        goto_next = {
-                            [']d'] = '@conditional.outer',
-                        },
-                        goto_previous = {
-                            ['[d'] = '@conditional.outer',
-                        },
-                    },
-                    lsp_interop = {
-                        enable = true,
-                        border = 'none',
-                        floating_preview_opts = {},
-                        peek_definition_code = {
-                            ['<leader>df'] = '@function.outer',
-                            ['<leader>dF'] = '@class.outer',
-                        },
-                    },
-                },
-            })
-            require('nvim-ts-autotag').setup({
-                opts = {
-                    -- Defaults
-                    enable_close = true,           -- Auto close tags
-                    enable_rename = true,          -- Auto rename pairs of tags
-                    enable_close_on_slash = false, -- Auto close on trailing </
-                },
-                -- Also override individual filetype configs, these take priority.
-                -- Empty by default, useful if one of the "opts" global settings
-                -- doesn't work well in a specific filetype
-                -- per_filetype = {
-                --   ["html"] = {
-                --     enable_close = false
-                --   }
-                -- }
-            })
-            require('treesitter-context').setup({
-                enable = true,           -- Enable this plugin (Can be enabled/disabled later via commands)
-                max_lines = 4,           -- How many lines the window should span. Values <= 0 mean no limit.
-                min_window_height = 4,   -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-                line_numbers = true,
-                multiline_threshold = 2, -- Maximum number of lines to show for a single context
-                trim_scope = 'outer',    -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-                mode = 'cursor',         -- Line used to calculate context. Choices: 'cursor', 'topline'
-                -- Separator between context and content. Should be a single character string, like '-'.
-                -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
-                separator = nil,
-                zindex = 20,     -- The Z-index of the context window
-                on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
-            })
-            -- Prefer git instead of curl in order to improve connectivity in some environments
-            -- require('nvim-treesitter.install').prefer_git = true
-            vim.keymap.set('n', '<leader>[c', function()
-                require('treesitter-context').go_to_context(vim.v.count1)
-            end, { silent = true })
-            local ts_update = require('nvim-treesitter.install').update({ with_sync = true })
-            ts_update()
-        end,
-    },
-    {
-        'stevearc/aerial.nvim',
-        event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
-        opts = {},
-        -- Optional dependencies
-        dependencies = {
-            'nvim-treesitter/nvim-treesitter',
-            'nvim-tree/nvim-web-devicons',
-        },
-    },
-    {
-        'nvim-tree/nvim-web-devicons',
-        opts = {
-            color_icons = true,
-            strict = true,
-            override_by_filename = {
-                ['.gitignore'] = {
-                    icon = '',
-                    color = '#f1502f',
-                    name = 'Gitignore',
-                },
-            },
-            override = {
-                zsh = {
-                    icon = '', --
-                    color = '#428850',
-                    cterm_color = '65',
-                    name = 'Zsh',
-                },
-            },
-            override_by_extension = {
-
-                ['log'] = {
-                    icon = '',
-                    color = '#81e043',
-                    name = 'Log',
-                },
-            },
-        },
-        config = function(_, opts)
-            --setting up web dev icons
-            -- dofile(vim.g.base46_cache .. "devicons")
-            require('nvim-web-devicons').setup(opts)
-        end,
-    },
-    {
-        'folke/ts-comments.nvim',
-        opts = {},
-        event = 'VeryLazy',
-        enabled = vim.fn.has('nvim-0.10.0') == 1,
-    },
-    { 'echasnovski/mini.icons', version = false },
     --   {'romgrk/barbar.nvim',
     --   dependencies = {
     --     'lewis6991/gitsigns.nvim', -- OPTIONAL: for git status
@@ -1319,149 +709,7 @@ local plugins = {
     --     require("nvim-web-devicons").setup(opts)
     --   end,
     -- },
-    {
-        'akinsho/bufferline.nvim',
-        event = 'VeryLazy',
-        version = '*',
-        dependencies = 'nvim-tree/nvim-web-devicons',
-        opts = {
-            options = {
-                mode = 'buffers',
-                -- style_preset = bufferline.style_preset.default,
-                themable = true,
-                numbers = 'none',
-                close_command = 'bdelete! %d',
-                right_mouse_command = 'bdelete! %d',
-                left_mouse_command = 'buffer %d',
-                middle_mouse_command = nil,
-                indicator = {
-                    icon = '▎',
-                    style = 'underline', -- Change this to 'icon', 'underline', or 'none'
-                },
-                -- buffer_close_icon = '',--
-                -- modified_icon = '●',
-                close_icon = '',
-                -- left_trunc_marker = '',
-                -- right_trunc_marker = '',
-                -- max_name_length = 18,
-                -- max_prefix_length = 15,
-                -- tab_size = 18,
-                diagnostics = 'nvim_lsp',
-                diagnostics_indicator = function(_, _, diag)
-                    local icons = {
-                        Error = ' ',
-                        Warn = ' ',
 
-                        Hint = ' ',
-
-                        Info = ' ',
-                    }
-                    local ret = (diag.error and icons.Error .. diag.error .. ' ' or '')
-                        .. (diag.warning and icons.Warn .. diag.warning or '')
-                    return vim.trim(ret)
-                end,
-                -- diagnostics_update_in_insert = true,
-                offsets = { { filetype = 'Oil', text = 'File Explorer', text_align = 'left' } },
-                show_buffer_icons = true,
-                show_buffer_close_icons = true,
-                show_close_icon = true,
-                show_tab_indicators = true,
-                persist_buffer_sort = true,
-                separator_style = 'slant', -- Change this to "slant", "thick", "thin", "padded_slant", or a custom table
-                enforce_regular_tabs = false,
-                always_show_bufferline = true,
-
-                sort_by = 'id',
-                --  get_element_icon = function(opts)
-                --   return {
-                --     octo = "",
-                -- }[opts.filetype]
-                -- end,
-            },
-        },
-        -- config = function(_, opts)
-        --   -- vim.cmd [[
-        --   --     " highlight TabLineSel guibg=#ff0000 guifg=#ffffff gui=bold
-        --   --     highlight BufferLineFill guibg=#1e1e1e
-        --   --     highlight BufferLineBackground guibg=#1e1e1e guifg=#5c6370
-        --   --     " highlight BufferLineBufferSelected guibg=#ff0000 guifg=#ffffff gui=bold
-        --   --     highlight BufferLineBufferVisible guibg=#1e1e1e guifg=#5c6370
-        --   --     highlight BufferLineSeparator guibg=#1e1e1e guifg=#1e1e1e
-        --   --     highlight BufferLineSeparatorVisible guibg=#1e1e1e guifg=#1e1e1e
-        --   --     " highlight BufferLineSeparatorSelected guibg=#ff0000 guifg=#ff0000
-        --   --     " highlight BufferLineIndicatorSelected guibg=#ff0000 guifg=#ff0000
-        --   -- ]]
-        --   -- vim.api.nvim_set_hl(0, 'BufferLineIndicatorUnderline', { fg = '#ff0000', underline = true })
-        --   require("bufferline").setup(opts)
-        -- end,
-    },
-    {
-        'tiagovla/scope.nvim',
-        event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
-        opts = {},
-        config = function()
-            require('scope').setup({})
-        end,
-    },
-
-    {
-        'stevearc/oil.nvim',
-        event = {
-            'VimEnter', --[[  "BufReadPost", "BufNewFile", "BufWritePre" ]]
-        },
-        -- opts = {},
-        -- Optional dependencies
-        dependencies = { { 'echasnovski/mini.icons', opts = {} } },
-        -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
-        config = function()
-            require('oil').setup({
-                default_file_explorer = true,
-                -- skip_confirm_for_simple_edits = true,
-                columns = {
-                    'icon',
-                    -- "permissions",
-                    'size',
-                    -- "mtime",
-                },
-                buf_options = {
-                    buflisted = false,
-                    bufhidden = 'hide',
-                },
-                view_options = {
-                    show_hidden = true, -- Show hidden files by default
-                    tree_style = true,
-                },
-                win_options = {
-                    wrap = false,
-                    -- signcolumn = "no",
-                    cursorcolumn = false,
-                    foldcolumn = '0',
-                    spell = false,
-                    list = false,
-                    conceallevel = 3,
-                    concealcursor = 'nvic',
-                    signcolumn = 'yes:2',
-                },
-                delete_to_trash = true,
-                skip_confirm_for_simple_edits = true,
-                prompt_save_on_select_new_entry = true,
-                cleanup_delay_ms = 2000,
-                show_hidden = true, -- Show hidden files
-                preview_split = 'left',
-            })
-            -- vim.cmd[['require("oil").toggle_hidden()']]
-        end,
-    },
-    {
-        'refractalize/oil-git-status.nvim',
-        event = { 'VimEnter', 'BufReadPost', 'BufNewFile', 'BufWritePre' },
-
-        dependencies = {
-            'stevearc/oil.nvim',
-        },
-
-        config = true,
-    },
     -- {
     -- 	"nvim-neo-tree/neo-tree.nvim",
     -- 	branch = "v3.x",
@@ -1506,21 +754,6 @@ local plugins = {
     --   end,
     -- },
     {
-        'ziontee113/color-picker.nvim',
-        event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
-        config = function()
-            require('color-picker').setup({ -- for changing icons & mappings
-                ['icons'] = { 'ﱢ', '' },
-                -- ["icons"] = { "ﮊ", "" },
-                -- ["icons"] = { "", "ﰕ" },
-                -- ["icons"] = { "", "" },
-                -- ["icons"] = { "", "" },
-                -- ["icons"] = { "ﱢ", "" },
-                -- ["border"] = "rounded", -- none | single | double | rounded | solid | shadow)
-            })
-        end,
-    },
-    {
         'dstein64/vim-startuptime',
         event = 'VimEnter',
         cmd = 'StartupTime',
@@ -1542,106 +775,108 @@ local plugins = {
         },
     },
     -- Adding a filename to the Top Right
-    {
-        'b0o/incline.nvim',
-        dependencies = {},
-        event = 'BufReadPre',
-        priority = 1200,
-        config = function()
-            -- local devicons = require("nvim-web-devicons")
-            -- require("incline").setup({
-            -- 	window = {
-            -- 		padding = 0,
-            -- 		margin = { horizontal = 0 },
-            -- 	},
-            -- 	render = function(props)
-            -- 		local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":t")
-            -- 		local filetype = vim.bo[props.buf].filetype
-            -- 		local icon, color = devicons.get_icon_color_by_filetype(filetype)
-            --
-            -- 		local modified = vim.bo[props.buf].modified
-            -- 		local buffer = {
-            -- 			icon and { " ", icon, " ", guifg = color } or "",
-            -- 			" ",
-            -- 			{ filename, gui = modified and "bold" },
-            -- 			" ",
-            -- 			guibg = "#000",
-            -- 		}
-            -- 		return buffer
-            -- 	end,
-            -- })
-            --
-            --
-            --
-            -- local helpers = require 'incline.helpers'
-            -- local navic = require 'nvim-navic'
-            -- local devicons = require 'nvim-web-devicons'
-            -- require('incline').setup {
-            -- 	window = {
-            -- 		padding = 0,
-            -- 		margin = { horizontal = 0, vertical = 0 },
-            -- 	},
-            -- 	render = function(props)
-            -- 		local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ':t')
-            -- 		if filename == '' then
-            -- 			filename = '[No Name]'
-            -- 		end
-            -- 		local ft_icon, ft_color = devicons.get_icon_color(filename)
-            -- 		local modified = vim.bo[props.buf].modified
-            -- 		local res = {
-            -- 			ft_icon and
-            -- 			{ ' ', ft_icon, ' ', guibg = ft_color, guifg = helpers.contrast_color(
-            -- 			ft_color) } or '',
-            -- 			' ',
-            -- 			{ filename, gui = modified and 'bold,italic' or 'bold' },
-            -- 			guibg = '#44406e',
-            -- 		}
-            -- 		if props.focused then
-            -- 			for _, item in ipairs(navic.get_data(props.buf) or {}) do
-            -- 				table.insert(res, {
-            -- 					{ ' > ',     group = 'NavicSeparator' },
-            -- 					{ item.icon, group = 'NavicIcons' .. item.type },
-            -- 					{ item.name, group = 'NavicText' },
-            -- 				})
-            -- 			end
-            -- 		end
-            -- 		table.insert(res, ' ')
-            -- 		return res
-            -- 	end,
-            -- }
-            --
-            --
-            local helpers = require('incline.helpers')
-            local devicons = require('nvim-web-devicons')
-            require('incline').setup({
-                window = {
-                    padding = 0,
-                    margin = { horizontal = 0 },
-                },
-                render = function(props)
-                    local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ':t')
-                    if filename == '' then
-                        filename = '[No Name]'
-                    end
-                    local ft_icon, ft_color = devicons.get_icon_color(filename)
-                    local modified = vim.bo[props.buf].modified
-                    return {
-                        ft_icon and {
-                            ' ',
-                            ft_icon,
-                            ' ',
-                            guibg = ft_color,
-                            guifg = helpers.contrast_color(ft_color),
-                        } or '',
-                        ' ',
-                        { filename, gui = modified and 'bold,italic' or 'bold' },
-                        ' ',
-                        guibg = '#44406e',
-                    }
-                end,
-            })
-        end,
-    },
+    -- {
+    --     'b0o/incline.nvim',
+    --     dependencies = {
+    --         'echasnovski/mini.icons',
+    --     },
+    --     -- event = 'BufReadPre',
+    --     -- priority = 1200,
+    --     config = function()
+    --         -- local devicons = require("nvim-web-devicons")
+    --         -- require("incline").setup({
+    --         -- 	window = {
+    --         -- 		padding = 0,
+    --         -- 		margin = { horizontal = 0 },
+    --         -- 	},
+    --         -- 	render = function(props)
+    --         -- 		local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":t")
+    --         -- 		local filetype = vim.bo[props.buf].filetype
+    --         -- 		local icon, color = devicons.get_icon_color_by_filetype(filetype)
+    --         --
+    --         -- 		local modified = vim.bo[props.buf].modified
+    --         -- 		local buffer = {
+    --         -- 			icon and { " ", icon, " ", guifg = color } or "",
+    --         -- 			" ",
+    --         -- 			{ filename, gui = modified and "bold" },
+    --         -- 			" ",
+    --         -- 			guibg = "#000",
+    --         -- 		}
+    --         -- 		return buffer
+    --         -- 	end,
+    --         -- })
+    --         --
+    --         --
+    --         --
+    --         -- local helpers = require 'incline.helpers'
+    --         -- local navic = require 'nvim-navic'
+    --         -- local devicons = require 'nvim-web-devicons'
+    --         -- require('incline').setup {
+    --         -- 	window = {
+    --         -- 		padding = 0,
+    --         -- 		margin = { horizontal = 0, vertical = 0 },
+    --         -- 	},
+    --         -- 	render = function(props)
+    --         -- 		local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ':t')
+    --         -- 		if filename == '' then
+    --         -- 			filename = '[No Name]'
+    --         -- 		end
+    --         -- 		local ft_icon, ft_color = devicons.get_icon_color(filename)
+    --         -- 		local modified = vim.bo[props.buf].modified
+    --         -- 		local res = {
+    --         -- 			ft_icon and
+    --         -- 			{ ' ', ft_icon, ' ', guibg = ft_color, guifg = helpers.contrast_color(
+    --         -- 			ft_color) } or '',
+    --         -- 			' ',
+    --         -- 			{ filename, gui = modified and 'bold,italic' or 'bold' },
+    --         -- 			guibg = '#44406e',
+    --         -- 		}
+    --         -- 		if props.focused then
+    --         -- 			for _, item in ipairs(navic.get_data(props.buf) or {}) do
+    --         -- 				table.insert(res, {
+    --         -- 					{ ' > ',     group = 'NavicSeparator' },
+    --         -- 					{ item.icon, group = 'NavicIcons' .. item.type },
+    --         -- 					{ item.name, group = 'NavicText' },
+    --         -- 				})
+    --         -- 			end
+    --         -- 		end
+    --         -- 		table.insert(res, ' ')
+    --         -- 		return res
+    --         -- 	end,
+    --         -- }
+    --         --
+    --         --
+    --         local helpers = require('incline.helpers')
+    --         local devicons = require('lua.plugins.icons')
+    --         require('incline').setup({
+    --             window = {
+    --                 padding = 0,
+    --                 margin = { horizontal = 0 },
+    --             },
+    --             render = function(props)
+    --                 local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ':t')
+    --                 if filename == '' then
+    --                     filename = '[No Name]'
+    --                 end
+    --                 local ft_icon, ft_color = devicons.get_icon_color(filename)
+    --                 local modified = vim.bo[props.buf].modified
+    --                 return {
+    --                     ft_icon and {
+    --                         ' ',
+    --                         ft_icon,
+    --                         ' ',
+    --                         guibg = ft_color,
+    --                         guifg = helpers.contrast_color(ft_color),
+    --                     } or '',
+    --                     ' ',
+    --                     { filename, gui = modified and 'bold,italic' or 'bold' },
+    --                     ' ',
+    --                     guibg = '#44406e',
+    --                 }
+    --             end,
+    --         })
+    --     end,
+    -- },
     {
         'nvim-lualine/lualine.nvim',
         event = 'VeryLazy',
@@ -2113,7 +1348,7 @@ local plugins = {
     -- --  })
     -- },
     -- },
-    { 'folke/neoconf.nvim',     cmd = 'Neoconf' },
+    { 'folke/neoconf.nvim', cmd = 'Neoconf' },
     { 'folke/lazydev.nvim' },
     {
         'lukas-reineke/indent-blankline.nvim',
@@ -2452,6 +1687,8 @@ local plugins = {
                 })
                 lspconfig.elixirls.setup({
                     capabilities = capabilities,
+                    cmd = { "elixir-ls" },
+                    filetypes = { "elixir", "eelixir" },
                 })
                 lspconfig.lexical.setup({
                     capabilities = capabilities,
@@ -2515,9 +1752,9 @@ local plugins = {
                 lspconfig.htmx.setup({
                     capabilities = capabilities,
                 })
-                lspconfig.hls.setup({
-                    capabilities = capabilities,
-                })
+                -- lspconfig.hls.setup({
+                --     capabilities = capabilities,
+                -- })
                 lspconfig.jsonls.setup({
                     capabilities = capabilities,
                 })
@@ -3437,12 +2674,12 @@ local opts = {
     },
 }
 -- require('lazy').setup({plugins,import="plugins"}, opts)
-require("lazy").setup({
-  spec = {
-    { plugins },
-    { import = "plugins" },
-  },
-  opts
+require('lazy').setup({
+    spec = {
+        { plugins },
+        { import = 'plugins' },
+    },
+    opts,
 })
 -- function rand_colorscheme()
 -- 	local less_preferred_colorschemes = {
@@ -3839,12 +3076,29 @@ end
 
 -- Function to insert a comment line
 function insert_comment_line()
-    local comment_line = string.rep('-', 80)
+    -- Get the current line number
+    local current_line = vim.fn.line('.')
+    -- print("Current line number:", current_line)
+    -- Get the previous line number
+    -- local previous_line = current_line - 1
+    -- print("Previous line number:", previous_line)
+    -- Check if previous line number is valid
+    if current_line <= 0 then print("Invalid previous line number.") return end
+    -- Get the text of the previous line 
+    local current_line_text = vim.fn.getline(current_line)
+    -- print("Previous line text:", current_line_text)
+    -- Calculate the length of the previous line
+    local line_length = #current_line_text
+
+    -- Debug print to check the line length
+    -- print("Line length:", line_length)
+    local comment_line = string.rep('-', line_length)
     vim.api.nvim_put({ comment_line }, 'l', true, true)
     vim.cmd('normal! k')
     -- vim.cmd("normal! gcc")
     local config = require('Comment.config'):get()
     require('Comment.api').toggle.linewise.current(nil, config)
+    vim.cmd('normal! ==') -- indent properly
     vim.cmd('normal! j')
 end
 
