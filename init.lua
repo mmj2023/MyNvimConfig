@@ -2325,35 +2325,20 @@ local plugins = {
     },
     {
         'nvimtools/none-ls.nvim',
+        dependencies = { 'nvimtools/none-ls-extras.nvim' },
         event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
         config = function()
             --setting up none-ls
-            local null_ls = require('null-ls')
+            local null_ls = require("null-ls")
+
             null_ls.setup({
                 sources = {
                     null_ls.builtins.formatting.stylua,
-                    -- null_ls.builtins.formatting.robocop,
+                    -- null_ls.builtins.completion.spell,
+                    require("none-ls.diagnostics.eslint"), -- requires none-ls-extras.nvim
                     null_ls.builtins.formatting.prettier,
                     null_ls.builtins.formatting.black,
-                    -- null_ls.builtins.diagnostics.rubocop,
-                    -- null_ls.builtins.diagnostics.quick-lint-js,
-                    -- null_ls.builtins.diagnostics.isort,
-                    -- none_ls.builtins.formatting.prettierd,
-                    -- none_ls.builtins.formatting.shfmt,
-                    -- none_ls.builtins.formatting.markdownlint,
-                    -- none_ls.builtins.formatting.mix,
-                    -- none_ls.builtins.formatting.sqlformat,
-                    -- none_ls.builtins.formatting.bacon,
-                    -- -- none_ls.builtins.formatting.quick-lint-js,
-                    -- -- none_ls.builtins.formatting.terraform_tflint,
-                    -- none_ls.builtins.formatting.rubocop,
-                    -- -- none_ls.builtins.formatting.standardrb,--not working
-                    -- -- none_ls.builtins.formatting.stylelint,
-                    -- none_ls.builtins.formatting.eslint_d,
-                    -- none_ls.builtins.diagnostics.rubocop,
-                    -- -- none_ls.builtins.diagnostics.stylelint,
-                    -- -- none_ls.builtins.diagnostics.eslint,
-                    -- require("none-ls.diagnostics.eslint_d"),
+
                 },
             })
             vim.keymap.set('n', '<leader>lgf', vim.lsp.buf.format, {})
@@ -3084,7 +3069,7 @@ function insert_comment_line()
     -- print("Previous line number:", previous_line)
     -- Check if previous line number is valid
     if current_line <= 0 then print("Invalid previous line number.") return end
-    -- Get the text of the previous line 
+    -- Get the text of the previous line
     local current_line_text = vim.fn.getline(current_line)
     -- print("Previous line text:", current_line_text)
     -- Calculate the length of the previous line
@@ -3137,6 +3122,7 @@ vim.api.nvim_create_autocmd('VimLeave', {
 -- Create an augroup named "RestoreCursorPosition"
 local group = vim.api.nvim_create_augroup('RestoreCursorPosition', { clear = true })
 -- Define an autocommand within that group
+
 vim.api.nvim_create_autocmd('BufReadPost', {
     group = group,
     pattern = '*',
@@ -3146,6 +3132,19 @@ vim.api.nvim_create_autocmd('BufReadPost', {
             vim.api.nvim_command('normal! g`"')
         end
     end,
+})
+
+local delete_trailing_spaces_group = vim.api.nvim_create_augroup('delete_trailing_spaces_group', { clear = true })
+vim.api.nvim_create_autocmd('BufWritePre', {
+    group = delete_trailing_spaces_group,
+    pattern = '*',
+    -- callback = function()
+    --     local pos = vim.fn.line('\'"')
+    --     if pos > 1 and pos <= vim.fn.line('$') then
+    --         vim.api.nvim_command('normal! g`"')
+    --     end
+    -- end,
+    command = [[%s/\s\+$//e]],
 })
 
 vim.keymap.set('n', '<leader>[t', function()
